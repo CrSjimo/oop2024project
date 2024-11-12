@@ -1,8 +1,6 @@
 package dev.sjimo.oop2024project.controller;
 
-import dev.sjimo.oop2024project.request.LoginRequest;
-import dev.sjimo.oop2024project.request.RegisterRequest;
-import dev.sjimo.oop2024project.request.VerificationRequest;
+import dev.sjimo.oop2024project.request.*;
 import dev.sjimo.oop2024project.service.JwtService;
 import dev.sjimo.oop2024project.service.UserService;
 import dev.sjimo.oop2024project.service.VerificationService;
@@ -32,7 +30,7 @@ public class AuthController {
 
     @PostMapping("/verify")
     public ResponseEntity<String> verifyToken(@RequestBody VerificationRequest request) {
-        var id = verificationService.verifyToken(request.getToken());
+        verificationService.verifyForRegistration(request.getToken());
         return ResponseEntity.ok().build();
     }
 
@@ -40,5 +38,23 @@ public class AuthController {
     public ResponseEntity<String> login(@RequestBody LoginRequest request) {
         String jwt = userService.loginUser(request.getEmail(), request.getPassword());
         return ResponseEntity.ok(jwt);
+    }
+
+    @PostMapping("/forgotPassword")
+    public ResponseEntity<String> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+        userService.forgetPassword(request.getEmail());
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/resetPassword")
+    public ResponseEntity<String> resetPassword(@RequestHeader(value = "Authorization", required = false) String jwtToken, @RequestBody ResetPasswordRequest request) {
+        if (jwtToken != null) {
+            Long userId = jwtService.extractUserId(jwtToken.replace("Bearer ", ""));
+            userService.resetPassword(userId, request.getNewPassword());
+        } else {
+            var userId = verificationService.verifyForResetPassword(request.getToken());
+            userService.resetPassword(userId, request.getNewPassword());
+        }
+        return ResponseEntity.ok().build();
     }
 }

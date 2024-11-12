@@ -46,6 +46,16 @@ public class VerificationService {
 
     public void verifyForRegistration(String token) {
         User user = verifyToken(token);
+        if (user.isVerified())
+            throw new ResponseException(ErrorCode.USER_ALREADY_VERIFIED);
+        user.setVerified(true);
+        userRepository.save(user);
+    }
 
+    public Long verifyForResetPassword(String token) {
+        User user = verifyToken(token);
+        if (!user.isVerified())
+            throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
+        return user.getId();
     }
 }

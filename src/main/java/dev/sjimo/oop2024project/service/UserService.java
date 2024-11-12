@@ -58,6 +58,7 @@ public class UserService {
         try {
             var user = userRepository.findById(id).orElseThrow();
             user.setPassword(password);
+            userRepository.save(user);
         } catch (NoSuchElementException e) {
             throw new RuntimeException(e); // TODO
         }
