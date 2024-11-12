@@ -32,8 +32,8 @@ public class VerificationService {
         return token.getToken();
     }
 
-    public boolean verifyToken(Long userId, String token) {
-        Optional<VerificationToken> verificationTokenOpt = tokenRepository.findByUser_Id(userId);
+    public boolean verifyToken(String token) {
+        Optional<VerificationToken> verificationTokenOpt = tokenRepository.findByToken(token);
         if (verificationTokenOpt.isPresent() && verificationTokenOpt.get().getToken().equals(token)
                 && verificationTokenOpt.get().getExpiryDate().isAfter(LocalDateTime.now())) {
             User user = verificationTokenOpt.get().getUser();

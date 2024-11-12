@@ -26,15 +26,13 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody RegisterRequest request) {
-        String jwt = userService.registerUser(request.getEmail(), request.getPassword());
-        return ResponseEntity.ok(jwt);
+        userService.registerUser(request.getEmail(), request.getPassword());
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/verify")
-    public ResponseEntity<String> verifyToken(@RequestHeader("Authorization") String jwtToken, @RequestBody VerificationRequest request) {
-        Long userId = jwtService.extractUserId(jwtToken.replace("Bearer ", ""));
-
-        boolean isVerified = verificationService.verifyToken(userId, request.getToken());
+    public ResponseEntity<String> verifyToken(@RequestBody VerificationRequest request) {
+        boolean isVerified = verificationService.verifyToken(request.getToken());
 
         if (isVerified) {
             return ResponseEntity.ok().build();

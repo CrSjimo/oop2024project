@@ -39,10 +39,6 @@ public class UserService {
         return jwtService.generateToken(user.getId());
     }
 
-    public boolean verifyToken(Long id, String token) {
-        return verificationService.verifyToken(id, token);
-    }
-
     public String loginUser(String email, String password) {
         Optional<User> userOpt = userRepository.findByEmail(email);
         if (userOpt.isPresent() && userOpt.get().isVerified() && userOpt.get().getPassword().equals(password)) {
