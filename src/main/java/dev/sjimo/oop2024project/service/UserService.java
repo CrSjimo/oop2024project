@@ -1,8 +1,11 @@
 package dev.sjimo.oop2024project.service;
 
+import dev.sjimo.oop2024project.model.UserData;
+import dev.sjimo.oop2024project.repository.UserDataRepository;
 import dev.sjimo.oop2024project.repository.UserRepository;
 import dev.sjimo.oop2024project.repository.VerificationTokenRepository;
 import dev.sjimo.oop2024project.model.User;
+import dev.sjimo.oop2024project.request.UserDataRequest;
 import dev.sjimo.oop2024project.utils.ErrorCode;
 import dev.sjimo.oop2024project.utils.ResponseException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +25,9 @@ public class UserService {
 
     @Autowired
     private VerificationService verificationService;
+
+    @Autowired
+    private UserDataRepository userDataRepository;
 
     @Autowired
     private JwtService jwtService;
@@ -50,6 +56,16 @@ public class UserService {
         }
         if (!user.getPassword().equals(password)) {
             throw new ResponseException(ErrorCode.AUTH_FAILED);
+        }
+        var userDataOpt = userDataRepository.findByUser_Id(user.getId());
+        if (userDataOpt.isEmpty()) {
+            var userData = new UserData();
+            userData.setUsername("User " + user.getId().toString());
+            userData.setGender(UserData.Gender.OTHER);
+            userData.setGravatarEmail(user.getEmail());
+            userData.setDescription("");
+            userData.setUser(user);
+            userDataRepository.save(userData);
         }
         return jwtService.generateToken(user.getId());
     }
