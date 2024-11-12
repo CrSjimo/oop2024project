@@ -31,7 +31,7 @@ public class UserService {
 
     public void registerUser(String email, String password) {
         if (userRepository.existsByEmail(email)) {
-            throw new ResponseException(ErrorCode.USER_NOT_EXIST);
+            throw new ResponseException(ErrorCode.USER_ALREADY_EXIST);
         }
         User user = new User();
         user.setEmail(email);
