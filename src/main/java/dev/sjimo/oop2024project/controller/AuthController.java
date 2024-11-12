@@ -32,13 +32,8 @@ public class AuthController {
 
     @PostMapping("/verify")
     public ResponseEntity<String> verifyToken(@RequestBody VerificationRequest request) {
-        boolean isVerified = verificationService.verifyToken(request.getToken());
-
-        if (isVerified) {
-            return ResponseEntity.ok().build();
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+        var id = verificationService.verifyToken(request.getToken());
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/login")
