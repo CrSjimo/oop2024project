@@ -10,7 +10,17 @@ public enum ErrorCode {
     AUTH_FAILED(HttpStatus.UNAUTHORIZED, 104, "Authentication failed"),
     INVALID_VERIFICATION_TOKEN(HttpStatus.UNAUTHORIZED, 105, "Invalid verification"),
     PERMISSION_DENIED(HttpStatus.FORBIDDEN, 106, "Permission denied"),
-    VERIFICATION_TOO_FREQUENT(HttpStatus.TOO_MANY_REQUESTS, 107, "Verification too frequent");
+    VERIFICATION_TOO_FREQUENT(HttpStatus.TOO_MANY_REQUESTS, 107, "Verification too frequent"),
+    FRIEND_CANNOT_SELF(HttpStatus.CONFLICT, 108, "Friend cannot be yourself"),
+    BLOCKED_BY_TARGET(HttpStatus.FORBIDDEN, 108, "Blocked by target"),
+    BLOCKED_BY_USER(HttpStatus.FORBIDDEN, 109, "Blocked by user"),
+    ALREADY_BE_FRIEND(HttpStatus.CONFLICT, 110, "Already have friend"),
+    FRIEND_APPLICATION_PENDING(HttpStatus.CONFLICT, 111, "Friend application pending"),
+    NOT_BE_FRIEND(HttpStatus.CONFLICT, 112, "Not be friend"),
+    ALREADY_BLOCKED(HttpStatus.CONFLICT, 113, "Already blocked"),
+    NOT_BLOCKED(HttpStatus.CONFLICT, 114, "Not blocked"),
+    FRIEND_APPLICATION_NOT_EXIST(HttpStatus.CONFLICT, 115, "Friend application not exist"),
+    FRIEND_APPLICATION_SOLVED(HttpStatus.CONFLICT, 116, "Friend application solved"),;
 
     private final HttpStatus status;
     private final int code;
