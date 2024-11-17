@@ -1,4 +1,4 @@
-package dev.sjimo.oop2024project.request;
+package dev.sjimo.oop2024project.payload;
 
 public class ResetPasswordRequest {
     private String token;

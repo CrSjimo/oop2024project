@@ -5,11 +5,9 @@ import dev.sjimo.oop2024project.repository.UserDataRepository;
 import dev.sjimo.oop2024project.repository.UserRepository;
 import dev.sjimo.oop2024project.repository.VerificationTokenRepository;
 import dev.sjimo.oop2024project.model.User;
-import dev.sjimo.oop2024project.request.UserDataRequest;
 import dev.sjimo.oop2024project.utils.ErrorCode;
 import dev.sjimo.oop2024project.utils.ResponseException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.NoSuchElementException;
@@ -46,6 +44,12 @@ public class UserService {
         userRepository.save(user);
 
         String token = verificationService.generateVerificationToken(user.getId());
+        mailService.sendVerificationEmail(email, token);
+    }
+
+    public void resendVerificationEmail(String email) {
+        var user = userRepository.findByEmail(email).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
+        var token = verificationService.regenerateVerificationToken(user.getId());
         mailService.sendVerificationEmail(email, token);
     }
 

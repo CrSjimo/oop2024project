@@ -1,12 +1,11 @@
 package dev.sjimo.oop2024project.controller;
 
-import dev.sjimo.oop2024project.model.UserData;
-import dev.sjimo.oop2024project.request.UserDataRequest;
+import dev.sjimo.oop2024project.payload.UserDataRequest;
+import dev.sjimo.oop2024project.payload.UserDataResponse;
 import dev.sjimo.oop2024project.service.JwtService;
 import dev.sjimo.oop2024project.service.UserDataService;
 import dev.sjimo.oop2024project.utils.ErrorCode;
 import dev.sjimo.oop2024project.utils.ResponseException;
-import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,9 +26,9 @@ public class UserDataController {
     }
 
     @GetMapping("/userdata/{id}")
-    public ResponseEntity<UserDataRequest> getUserData(@PathVariable("id") Long userId) {
-        UserDataRequest userDataRequest = userDataService.getUserData(userId);
-        return ResponseEntity.ok(userDataRequest);
+    public ResponseEntity<UserDataResponse> getUserData(@PathVariable("id") Long userId) {
+        var response = userDataService.getUserData(userId);
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/userdata/{id}")

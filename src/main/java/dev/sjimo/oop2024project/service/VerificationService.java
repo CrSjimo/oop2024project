@@ -9,6 +9,7 @@ import dev.sjimo.oop2024project.utils.ResponseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
@@ -24,10 +25,24 @@ public class VerificationService {
     public String generateVerificationToken(Long userId) {
         VerificationToken token = new VerificationToken();
         token.setToken(UUID.randomUUID().toString());
+        token.setIssuedDate(LocalDateTime.now());
         token.setExpiryDate(LocalDateTime.now().plusMinutes(10));
 
         User user = userRepository.findById(userId).orElseThrow();
         token.setUser(user);
+
+        tokenRepository.save(token);
+        return token.getToken();
+    }
+
+    public String regenerateVerificationToken(Long userId) {
+        var token = tokenRepository.findByUser_Id(userId).orElse(new VerificationToken());
+        if (token.getIssuedDate() != null && Duration.between(token.getIssuedDate(), LocalDateTime.now()).toSeconds() < 60) {
+            throw new ResponseException(ErrorCode.VERIFICATION_TOO_FREQUENT);
+        }
+        token.setToken(UUID.randomUUID().toString());
+        token.setIssuedDate(LocalDateTime.now());
+        token.setExpiryDate(LocalDateTime.now().plusMinutes(10));
 
         tokenRepository.save(token);
         return token.getToken();

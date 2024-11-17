@@ -1,6 +1,6 @@
-package dev.sjimo.oop2024project.request;
+package dev.sjimo.oop2024project.payload;
 
-public class ForgotPasswordRequest {
+public class ResendVerificationEmailRequest {
     private String email;
 
     public String getEmail() {

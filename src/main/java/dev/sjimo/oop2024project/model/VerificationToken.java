@@ -11,6 +11,7 @@ public class VerificationToken {
     private Long id;
 
     private String token;
+    private LocalDateTime issuedDate;
     private LocalDateTime expiryDate;
 
     // 使用 @ManyToOne 注解关联到 User 表
@@ -28,6 +29,14 @@ public class VerificationToken {
 
     public void setToken(String token) {
         this.token = token;
+    }
+
+    public LocalDateTime getIssuedDate() {
+        return issuedDate;
+    }
+
+    public void setIssuedDate(LocalDateTime issuedDate) {
+        this.issuedDate = issuedDate;
     }
 
     public LocalDateTime getExpiryDate() {

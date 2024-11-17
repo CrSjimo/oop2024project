@@ -9,7 +9,8 @@ public enum ErrorCode {
     USER_ALREADY_VERIFIED(HttpStatus.CONFLICT, 103, "User already verified"),
     AUTH_FAILED(HttpStatus.UNAUTHORIZED, 104, "Authentication failed"),
     INVALID_VERIFICATION_TOKEN(HttpStatus.UNAUTHORIZED, 105, "Invalid verification"),
-    PERMISSION_DENIED(HttpStatus.FORBIDDEN, 106, "Permission denied");
+    PERMISSION_DENIED(HttpStatus.FORBIDDEN, 106, "Permission denied"),
+    VERIFICATION_TOO_FREQUENT(HttpStatus.TOO_MANY_REQUESTS, 107, "Verification too frequent");
 
     private final HttpStatus status;
     private final int code;

@@ -1,7 +1,8 @@
 package dev.sjimo.oop2024project.service;
 
+import dev.sjimo.oop2024project.payload.UserDataResponse;
 import dev.sjimo.oop2024project.repository.UserDataRepository;
-import dev.sjimo.oop2024project.request.UserDataRequest;
+import dev.sjimo.oop2024project.payload.UserDataRequest;
 import dev.sjimo.oop2024project.utils.ErrorCode;
 import dev.sjimo.oop2024project.utils.ResponseException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +14,10 @@ public class UserDataService {
     @Autowired
     private UserDataRepository userDataRepository;
 
-    public UserDataRequest getUserData(Long userId) {
+    public UserDataResponse getUserData(Long userId) {
         var userData = userDataRepository.findByUser_Id(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
 
-        return new UserDataRequest(userData.getUsername(),userData.getGender(),userData.getGravatarEmail(),userData.getDescription());
+        return new UserDataResponse(userData.getUsername(),userData.getGender(),userData.getGravatarEmail(),userData.getDescription());
     }
     public void setUserData(Long userId, UserDataRequest userDataRequest) {
         var userData = userDataRepository.findByUser_Id(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));

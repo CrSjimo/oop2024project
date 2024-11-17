@@ -1,6 +1,6 @@
-package dev.sjimo.oop2024project.request;
+package dev.sjimo.oop2024project.payload;
 
-public class LoginRequest {
+public class RegisterRequest {
     private String email;
     private String password;
 
