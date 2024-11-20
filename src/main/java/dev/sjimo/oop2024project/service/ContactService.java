@@ -28,7 +28,7 @@ public class ContactService {
     @Autowired
     private UserRepository userRepository;
 
-    public void addFriend(Long userId, Long friendId) {
+    public void addFriend(Long userId, Long friendId, String message) {
         User user = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
         User friend = userRepository.findById(friendId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
 
@@ -71,6 +71,7 @@ public class ContactService {
         friendCandidateEntry.setUser1(user);
         friendCandidateEntry.setUser2(friend);
         friendCandidateEntry.setStatus(FriendCandidate.Status.PENDING);
+        friendCandidateEntry.setMessage(message);
         friendCandidateRepository.save(friendCandidateEntry);
     }
 
@@ -134,18 +135,24 @@ public class ContactService {
         }
         blockListRepository.delete(blockEntry.get());
     }
-    public void acceptFriendApplication(Long friendCandidateId) {
+    public void acceptFriendApplication(Long user1Id, Long friendCandidateId) {
         var friendCandidate = friendCandidateRepository.findById(friendCandidateId).orElseThrow(() -> new ResponseException(ErrorCode.FRIEND_APPLICATION_NOT_EXIST));
+        if (!friendCandidate.getUser1().getId().equals(user1Id)) {
+            throw new ResponseException(ErrorCode.FRIEND_APPLICATION_NOT_EXIST);
+        }
         if (friendCandidate.getStatus() != FriendCandidate.Status.PENDING) {
             throw new ResponseException(ErrorCode.FRIEND_APPLICATION_SOLVED);
         }
         friendCandidate.setStatus(FriendCandidate.Status.ACCEPTED);
         friendCandidateRepository.save(friendCandidate);
-        addFriend(friendCandidate.getUser1().getId(), friendCandidate.getUser2().getId());
+        addFriend(friendCandidate.getUser1().getId(), friendCandidate.getUser2().getId(), null);
     }
 
-    public void rejectFriendApplication(Long friendCandidateId) {
+    public void rejectFriendApplication(Long user1Id, Long friendCandidateId) {
         var friendCandidate = friendCandidateRepository.findById(friendCandidateId).orElseThrow(() -> new ResponseException(ErrorCode.FRIEND_APPLICATION_NOT_EXIST));
+        if (!friendCandidate.getUser1().getId().equals(user1Id)) {
+            throw new ResponseException(ErrorCode.FRIEND_APPLICATION_NOT_EXIST);
+        }
         if (friendCandidate.getStatus() != FriendCandidate.Status.PENDING) {
             throw new ResponseException(ErrorCode.FRIEND_APPLICATION_SOLVED);
         }
@@ -167,6 +174,7 @@ public class ContactService {
         ArrayList<FriendCandidateResponse> friendCandidatesArrayList = new ArrayList<>();
         friendCandidates.forEach(friendCandidate -> {
             FriendCandidateResponse friendCandidateResponse = new FriendCandidateResponse();
+            friendCandidateResponse.setId(friendCandidate.getId());
             friendCandidateResponse.setUserId(friendCandidate.getUser2().getId());
             friendCandidateResponse.setStatus(friendCandidate.getStatus());
             friendCandidateResponse.setCreatedDate(friendCandidate.getCreatedDate());
@@ -191,6 +199,7 @@ public class ContactService {
         ArrayList<FriendCandidateResponse> friendCandidatesArrayList = new ArrayList<>();
         friendCandidates.forEach(friendCandidate -> {
             FriendCandidateResponse friendCandidateResponse = new FriendCandidateResponse();
+            friendCandidateResponse.setId(friendCandidate.getId());
             friendCandidateResponse.setUserId(friendCandidate.getUser1().getId());
             friendCandidateResponse.setStatus(friendCandidate.getStatus());
             friendCandidateResponse.setCreatedDate(friendCandidate.getCreatedDate());

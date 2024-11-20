@@ -5,10 +5,15 @@ import dev.sjimo.oop2024project.model.FriendCandidate;
 import java.time.LocalDateTime;
 
 public class FriendCandidateResponse {
+    Long id;
     Long userId;
     String message;
     FriendCandidate.Status status;
     LocalDateTime createdDate;
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public void setMessage(String message) {
         this.message = message;
