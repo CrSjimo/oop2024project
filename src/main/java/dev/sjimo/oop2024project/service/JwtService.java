@@ -25,7 +25,7 @@ public class JwtService {
                 .subject(String.valueOf(userId))
                 .claim("pwd", user.getPassword())
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 10))
+                .expiration(new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 24 * 100))
                 .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
                 .compact();
     }

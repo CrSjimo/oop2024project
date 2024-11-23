@@ -17,6 +17,8 @@ public class Friend {
     @JoinColumn(name = "user2_id",nullable = false)
     private User user2;
     private LocalDateTime createdDate;
+
+    //FIXME 怎么只有一个备注名，两个人应该分别能给对方设置备注名
     private String commentName;
 
     public Long getId() {

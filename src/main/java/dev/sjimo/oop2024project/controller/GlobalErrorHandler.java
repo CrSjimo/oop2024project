@@ -6,10 +6,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RestControllerAdvice
 public class GlobalErrorHandler {
     @ExceptionHandler(ResponseException.class)
-    public ResponseEntity<ErrorCode> handleEmailAlreadyExistsException(ResponseException ex) {
-        return ResponseEntity.status(ex.getErrorCode().getStatus()).body(ex.getErrorCode());
+    public ResponseEntity<Map<String, Object>> handle(ResponseException ex) {
+        var body = new HashMap<String, Object>();
+        body.put("code", ex.getErrorCode().getCode());
+        body.put("message", ex.getErrorCode().getMessage());
+        return ResponseEntity.status(ex.getErrorCode().getStatus()).body(body);
     }
 }

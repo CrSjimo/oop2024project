@@ -26,37 +26,33 @@ public class AuthController {
     private MailService mailService;
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody RegisterRequest request) {
+    public void register(@RequestBody RegisterRequest request) {
         userService.registerUser(request.getEmail(), request.getPassword());
-        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/resendVerificationEmail")
-    public ResponseEntity<String> resendVerificationEmail(@RequestBody ResendVerificationEmailRequest request) {
+    public void resendVerificationEmail(@RequestBody ResendVerificationEmailRequest request) {
         userService.resendVerificationEmail(request.getEmail());
-        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/verify")
-    public ResponseEntity<String> verifyToken(@RequestBody VerificationRequest request) {
+    public void verifyToken(@RequestBody VerificationRequest request) {
         verificationService.verifyForRegistration(request.getToken());
-        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginRequest request) {
+    public LoginResponse login(@RequestBody LoginRequest request) {
         String jwt = userService.loginUser(request.getEmail(), request.getPassword());
-        return ResponseEntity.ok(jwt);
+        return new LoginResponse(jwt);
     }
 
     @PostMapping("/forgotPassword")
-    public ResponseEntity<String> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+    public void forgotPassword(@RequestBody ForgotPasswordRequest request) {
         userService.forgetPassword(request.getEmail());
-        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/resetPassword")
-    public ResponseEntity<String> resetPassword(@RequestHeader(value = "Authorization", required = false) String jwtToken, @RequestBody ResetPasswordRequest request) {
+    public void resetPassword(@RequestHeader(value = "Authorization", required = false) String jwtToken, @RequestBody ResetPasswordRequest request) {
         if (jwtToken != null) {
             Long userId = jwtService.extractUserId(jwtToken.replace("Bearer ", ""));
             userService.resetPassword(userId, request.getNewPassword());
@@ -64,6 +60,5 @@ public class AuthController {
             var userId = verificationService.verifyForResetPassword(request.getToken());
             userService.resetPassword(userId, request.getNewPassword());
         }
-        return ResponseEntity.ok().build();
     }
 }

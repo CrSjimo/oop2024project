@@ -16,4 +16,19 @@ public class UserDataResponse {
         this.description = description;
     }
 
+    public String getUsername() {
+        return username;
+    }
+
+    public UserData.Gender getGender() {
+        return gender;
+    }
+
+    public String getGravatarEmail() {
+        return gravatarEmail;
+    }
+
+    public String getDescription() {
+        return description;
+    }
 }

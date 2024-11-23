@@ -5,7 +5,7 @@ import dev.sjimo.oop2024project.model.Friend;
 import dev.sjimo.oop2024project.model.FriendCandidate;
 import dev.sjimo.oop2024project.model.User;
 import dev.sjimo.oop2024project.payload.FriendCandidateResponse;
-import dev.sjimo.oop2024project.payload.FriendCandidatesResponse;
+import dev.sjimo.oop2024project.payload.FriendResponse;
 import dev.sjimo.oop2024project.repository.BlockListRepository;
 import dev.sjimo.oop2024project.repository.FriendCandidateRepository;
 import dev.sjimo.oop2024project.repository.FriendRepository;
@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class ContactService {
@@ -96,6 +97,18 @@ public class ContactService {
         friendEntry.ifPresent(value -> friendRepository.delete(value));
     }
 
+    public List<FriendResponse> listFriends(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
+        var friends = friendRepository.listFriendsWithCollation(user.getId());
+        return friends.stream().map(friend -> {
+            var friendId = friend.getUser1().getId();
+            if (friendId.equals(userId)) {
+                friendId = friend.getUser2().getId();
+            }
+            return new FriendResponse(friendId, friend.getCommentName());
+        }).toList();
+    }
+
     public void blockOther(Long userId, Long otherId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
         User other = userRepository.findById(otherId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
@@ -165,49 +178,41 @@ public class ContactService {
      * @param userId 自己的userId
      * @return
      */
-    public FriendCandidatesResponse getSelfFriendCandidates(Long userId) {
+    public List<FriendCandidateResponse> getSelfFriendCandidates(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
         if (!user.isVerified()) {
             throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
         }
         var friendCandidates = friendCandidateRepository.findAllByUser1_IdOrderByCreatedDate(userId);
-        ArrayList<FriendCandidateResponse> friendCandidatesArrayList = new ArrayList<>();
-        friendCandidates.forEach(friendCandidate -> {
+        return friendCandidates.stream().map(friendCandidate -> {
             FriendCandidateResponse friendCandidateResponse = new FriendCandidateResponse();
             friendCandidateResponse.setId(friendCandidate.getId());
             friendCandidateResponse.setUserId(friendCandidate.getUser2().getId());
             friendCandidateResponse.setStatus(friendCandidate.getStatus());
             friendCandidateResponse.setCreatedDate(friendCandidate.getCreatedDate());
             friendCandidateResponse.setMessage(friendCandidate.getMessage());
-            friendCandidatesArrayList.add(friendCandidateResponse);
-        });
-        FriendCandidatesResponse friendCandidatesResponse = new FriendCandidatesResponse();
-        friendCandidatesResponse.setList(friendCandidatesArrayList);
-        return friendCandidatesResponse;
+            return friendCandidateResponse;
+        }).toList();
     }
     /**
      * 获取别人发给自己的好友申请
      * @param userId 自己的userId
      * @return
      */
-    public FriendCandidatesResponse getOtherFriendCandidates(Long userId) {
+    public List<FriendCandidateResponse> getOtherFriendCandidates(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
         if (!user.isVerified()) {
             throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
         }
         var friendCandidates = friendCandidateRepository.findAllByUser2_IdOrderByCreatedDate(userId);
-        ArrayList<FriendCandidateResponse> friendCandidatesArrayList = new ArrayList<>();
-        friendCandidates.forEach(friendCandidate -> {
+        return friendCandidates.stream().map(friendCandidate -> {
             FriendCandidateResponse friendCandidateResponse = new FriendCandidateResponse();
             friendCandidateResponse.setId(friendCandidate.getId());
             friendCandidateResponse.setUserId(friendCandidate.getUser1().getId());
             friendCandidateResponse.setStatus(friendCandidate.getStatus());
             friendCandidateResponse.setCreatedDate(friendCandidate.getCreatedDate());
             friendCandidateResponse.setMessage(friendCandidate.getMessage());
-            friendCandidatesArrayList.add(friendCandidateResponse);
-        });
-        FriendCandidatesResponse friendCandidatesResponse = new FriendCandidatesResponse();
-        friendCandidatesResponse.setList(friendCandidatesArrayList);
-        return friendCandidatesResponse;
+            return friendCandidateResponse;
+        }).toList();
     }
 }
