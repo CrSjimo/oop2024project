@@ -287,6 +287,7 @@ stateDiagram-v2
 | CreateTime     | TIMESTAMP            | 创建时间                                 |
 | UserChatRoomID | INT, FOREIGN KEY     | 外键，聊天室成员列表                     |
 | MessageQueueID | INT, FOREIGN KEY     | 外键，聊天列表（**涉及聊天记历史信息**） |
+  
 
 ### 聊天室成员表（UserChatRoom）
 
