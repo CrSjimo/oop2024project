@@ -15,7 +15,6 @@ import dev.sjimo.oop2024project.utils.ResponseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -51,7 +50,7 @@ public class ContactService {
             throw new ResponseException(ErrorCode.BLOCKED_BY_TARGET);
         }
 
-        if (friendRepository.existsByUserAndUser2(user, friend)) {
+        if (friendRepository.existsByUser1AndUser2(user, friend)) {
             throw new ResponseException(ErrorCode.ALREADY_BE_FRIEND);
         }
 
