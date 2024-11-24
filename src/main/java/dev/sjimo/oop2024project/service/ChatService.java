@@ -20,6 +20,8 @@ public class ChatService {
     FriendRepository friendRepository;
     @Autowired
     ChatToMemberCandidateRepository chatToMemberCandidateRepository;
+    @Autowired
+    private MemberToChatCandidateRepository memberToChatCandidateRepository;
 
     public ChatResponse getPrivateChat(Long user1Id, Long user2Id) {
         User user1 = userRepository.findById(user1Id).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
@@ -80,6 +82,15 @@ public class ChatService {
             throw new ResponseException(ErrorCode.USER_ALREADY_EXIST);
         }
 
+        var memberToChatCandidate = memberToChatCandidateRepository.findByUser_IdAndChat_Id(userId, chatId);
+        if (memberToChatCandidate.isPresent()) {
+            ChatMember chatMemberEntity = new ChatMember();
+            chatMemberEntity.setChat(chat);
+            chatMemberEntity.setUser(user);
+            chatMemberEntity.setMemberType(ChatMember.MemberType.REGULAR_MEMBER);
+            chatMemberRepository.save(chatMemberEntity);
+            return;
+        }
         ChatToMemberCandidate chatToMemberCandidateEntity = new ChatToMemberCandidate();
         chatToMemberCandidateEntity.setChat(chat);
         chatToMemberCandidateEntity.setUser(user);
@@ -87,5 +98,40 @@ public class ChatService {
         chatToMemberCandidateEntity.setMessage(message);
         chatToMemberCandidateEntity.setStatus(ChatToMemberCandidate.Status.PENDING);
         chatToMemberCandidateRepository.save(chatToMemberCandidateEntity);
+    }
+
+    //申请加入群聊
+    public void ApplyToJoinGroup(Long userId,Long chatId,String message){
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
+        if (!user.isVerified()){
+            throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
+        }
+        Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new ResponseException(ErrorCode.CHAT_NOT_EXIST));
+
+        if (chat.getType()!=Chat.Type.GROUP_CHAT)
+            throw new ResponseException(ErrorCode.CHAT_NOT_GROUP);
+
+        if (chatToMemberCandidateRepository.existsByUser_IdAndChat_IdAndStatus(userId, chatId, ChatToMemberCandidate.Status.PENDING)) {
+            throw new ResponseException(ErrorCode.INVITAIOIN_ALREADY_EXIST);
+        }
+
+        if (chatMemberRepository.existsByUser_IdAndChat_Id(chatId, userId)) {
+            throw new ResponseException(ErrorCode.USER_ALREADY_EXIST);
+        }
+
+        var chatToMemberCandidate = chatToMemberCandidateRepository.findByUser_IdAndChat_Id(userId, chatId);
+        if (chatToMemberCandidate.isPresent()) {
+            ChatMember chatMemberEntity = new ChatMember();
+            chatMemberEntity.setChat(chat);
+            chatMemberEntity.setUser(user);
+            chatMemberEntity.setMemberType(ChatMember.MemberType.REGULAR_MEMBER);
+            chatMemberRepository.save(chatMemberEntity);
+            return;
+        }
+        MemberToChatCandidate memberToChatCandidateEntity = new MemberToChatCandidate();
+        memberToChatCandidateEntity.setChat(chat);
+        memberToChatCandidateEntity.setUser(user);
+        memberToChatCandidateEntity.setStatus(MemberToChatCandidate.Status.PENDING);
+        memberToChatCandidateRepository.save(memberToChatCandidateEntity);
     }
 }

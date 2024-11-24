@@ -66,6 +66,7 @@ public class ContactService {
             friendEntry.setUser1(user);
             friendEntry.setUser2(friend);
             friendRepository.save(friendEntry);
+            return;
         }
         FriendCandidate friendCandidateEntry = new FriendCandidate();
         friendCandidateEntry.setUser1(user);
