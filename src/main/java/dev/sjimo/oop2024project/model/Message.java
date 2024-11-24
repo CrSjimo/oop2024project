@@ -13,7 +13,7 @@ public class Message {
     @OneToOne
     @JoinColumn(name = "user_id",nullable = false)
     private User user;
-    @OneToMany
+    @ManyToOne
     @JoinColumn(name = "chat_id",nullable = false)
     private Chat chat;
 

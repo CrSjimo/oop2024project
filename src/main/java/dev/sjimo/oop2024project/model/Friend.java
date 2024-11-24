@@ -18,9 +18,12 @@ public class Friend {
     private User user2;
     private LocalDateTime createdDate;
 
-    //FIXME 怎么只有一个备注名，两个人应该分别能给对方设置备注名
     private String commentName1;//user2给user1的备注名
     private String commentName2;//user1给user2的备注名
+
+    @OneToOne
+    @JoinColumn(name = "chat_id", nullable = false)
+    private Chat chat;
 
     public Long getId() {
         return id;
@@ -58,4 +61,12 @@ public class Friend {
         return commentName1;
     }
     public String getCommentName2() { return commentName2; }
+
+    public Chat getChat() {
+        return chat;
+    }
+
+    public void setChat(Chat chat) {
+        this.chat = chat;
+    }
 }
