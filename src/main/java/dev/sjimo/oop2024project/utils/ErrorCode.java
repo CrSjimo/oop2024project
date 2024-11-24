@@ -20,7 +20,10 @@ public enum ErrorCode {
     ALREADY_BLOCKED(HttpStatus.CONFLICT, 113, "Already blocked"),
     NOT_BLOCKED(HttpStatus.CONFLICT, 114, "Not blocked"),
     FRIEND_APPLICATION_NOT_EXIST(HttpStatus.CONFLICT, 115, "Friend application not exist"),
-    FRIEND_APPLICATION_SOLVED(HttpStatus.CONFLICT, 116, "Friend application solved"),;
+    FRIEND_APPLICATION_SOLVED(HttpStatus.CONFLICT, 116, "Friend application solved"),
+    CHAT_NOT_EXIST(HttpStatus.NOT_FOUND,117,"Chat not exist"),
+    CHAT_NOT_GROUP(HttpStatus.UNAUTHORIZED,118,"Permission denied"),
+    INVITAIOIN_ALREADY_EXIST(HttpStatus.CONFLICT,119,"Invitation already in use"),;
 
     private final HttpStatus status;
     private final int code;

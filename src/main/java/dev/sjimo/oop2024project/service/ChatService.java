@@ -1,13 +1,8 @@
 package dev.sjimo.oop2024project.service;
 
-import dev.sjimo.oop2024project.model.Chat;
-import dev.sjimo.oop2024project.model.ChatMember;
-import dev.sjimo.oop2024project.model.User;
+import dev.sjimo.oop2024project.model.*;
 import dev.sjimo.oop2024project.payload.ChatResponse;
-import dev.sjimo.oop2024project.repository.ChatMemberRepository;
-import dev.sjimo.oop2024project.repository.ChatRepository;
-import dev.sjimo.oop2024project.repository.FriendRepository;
-import dev.sjimo.oop2024project.repository.UserRepository;
+import dev.sjimo.oop2024project.repository.*;
 import dev.sjimo.oop2024project.utils.ErrorCode;
 import dev.sjimo.oop2024project.utils.ResponseException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +18,8 @@ public class ChatService {
     UserRepository userRepository;
     @Autowired
     FriendRepository friendRepository;
+    @Autowired
+    ChatToMemberCandidateRepository chatToMemberCandidateRepository;
 
     public ChatResponse getPrivateChat(Long user1Id, Long user2Id) {
         User user1 = userRepository.findById(user1Id).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
@@ -59,4 +56,36 @@ public class ChatService {
         return new ChatResponse(chat.getId(), chat.getName(), chat.getType(), null, null);
     }
 
+    public void sendInvitation(Long issuerId, Long userId,Long chatId,String message) {
+        User sender = userRepository.findById(issuerId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));//判读发送者是否存在
+        if (!sender.isVerified())
+            throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
+        if (!user.isVerified())
+            throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
+        Chat chat = chatRepository.findById(chatId).orElseThrow(()->new ResponseException(ErrorCode.CHAT_NOT_EXIST));
+
+        ChatMember chatMember = chatMemberRepository.findByUser_IdAndChat_Id(issuerId,chatId)
+                .filter(cm -> cm.getMemberType() == ChatMember.MemberType.GROUP_OWNER || cm.getMemberType() == ChatMember.MemberType.Administrator)
+                .orElseThrow(()->new ResponseException(ErrorCode.PERMISSION_DENIED));
+
+        if (chat.getType()!=Chat.Type.GROUP_CHAT)
+            throw new ResponseException(ErrorCode.CHAT_NOT_GROUP);
+
+        if (chatToMemberCandidateRepository.existsByUser_IdAndChat_IdAndStatus(userId, chatId, ChatToMemberCandidate.Status.PENDING)) {
+            throw new ResponseException(ErrorCode.INVITAIOIN_ALREADY_EXIST);
+        }
+
+        if (chatMemberRepository.existsByUser_IdAndChat_Id(chatId, userId)) {
+            throw new ResponseException(ErrorCode.USER_ALREADY_EXIST);
+        }
+
+        ChatToMemberCandidate chatToMemberCandidateEntity = new ChatToMemberCandidate();
+        chatToMemberCandidateEntity.setChat(chat);
+        chatToMemberCandidateEntity.setUser(user);
+        chatToMemberCandidateEntity.setIssuer(sender);
+        chatToMemberCandidateEntity.setMessage(message);
+        chatToMemberCandidateEntity.setStatus(ChatToMemberCandidate.Status.PENDING);
+        chatToMemberCandidateRepository.save(chatToMemberCandidateEntity);
+    }
 }
