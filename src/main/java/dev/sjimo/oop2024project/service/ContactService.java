@@ -105,7 +105,7 @@ public class ContactService {
             if (friendId.equals(userId)) {
                 friendId = friend.getUser2().getId();
             }
-            return new FriendResponse(friendId, friend.getCommentName());
+            return new FriendResponse(friendId, userId.equals(friend.getUser1().getId()) ? friend.getCommentName2() : friend.getCommentName1());
         }).toList();
     }
 
