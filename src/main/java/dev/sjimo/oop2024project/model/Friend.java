@@ -19,7 +19,8 @@ public class Friend {
     private LocalDateTime createdDate;
 
     //FIXME 怎么只有一个备注名，两个人应该分别能给对方设置备注名
-    private String commentName;
+    private String commentName1;//user2给user1的备注名
+    private String commentName2;//user1给user2的备注名
 
     public Long getId() {
         return id;
@@ -45,11 +46,16 @@ public class Friend {
         return createdDate;
     }
 
-    public void setCommentName(String commentName) {
-        this.commentName = commentName;
+    public void setCommentName1(String commentName1) {
+        this.commentName1 = this.commentName1;
     }
 
-    public String getCommentName() {
-        return commentName;
+    public void setCommentName2(String commentName2) {
+        this.commentName2 = this.commentName2;
     }
+
+    public String getCommentName1() {
+        return commentName1;
+    }
+    public String getCommentName2() { return commentName2; }
 }

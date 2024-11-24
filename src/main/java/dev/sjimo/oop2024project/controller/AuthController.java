@@ -25,7 +25,7 @@ public class AuthController {
     @Autowired
     private MailService mailService;
 
-    @PostMapping("/register")
+    @PostMapping("/register")//子路径
     public void register(@RequestBody RegisterRequest request) {
         userService.registerUser(request.getEmail(), request.getPassword());
     }

@@ -33,7 +33,7 @@ public interface FriendRepository extends JpaRepository<Friend, Long> {
         WHERE
             f.user1_id = :userId OR f.user2_id = :userId
         ORDER BY
-            CASE WHEN f.comment_name IS NOT NULL THEN f.comment_name ELSE ud.username END
+            CASE WHEN CASE WHEN f.user1_id = :userId THEN f.comment_name2 ELSE f.comment_name1 END IS NOT NULL THEN f.comment_name ELSE ud.username END
         COLLATE
             utf8mb4_zh_0900_as_cs
         """, nativeQuery = true)

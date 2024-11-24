@@ -130,3 +130,83 @@ https://developer.mozilla.org › References › Web APIs
 Spring
 
 https://spring.io › guides › messaging-stom...
+
+# JPA
+
+### 架构
+
+```mermaid
+classDiagram
+    class Persistence {
+        +static EntityManagerFactory createEntityManagerFactory(String persistenceUnitName)
+    }
+
+    class EntityManagerFactory {
+        +EntityManager createEntityManager()
+        +void close()
+    }
+
+    class EntityManager {
+        +EntityTransaction getTransaction()
+        +Query createQuery(String qlString)
+        +void persist(Object entity)
+        +Object find(Class entityClass, Object primaryKey)
+        +void merge(Object entity)
+        +void remove(Object entity)
+    }
+
+    class EntityTransaction {
+        +void begin()
+        +void commit()
+        +void rollback()
+        +boolean isActive()
+    }
+
+    class Entity {
+        <<entity>>
+        +long id
+    }
+
+    class Query {
+        +List getResultList()
+        +Object getSingleResult()
+    }
+
+    Persistence --> EntityManagerFactory : creates
+    EntityManagerFactory --> EntityManager : creates
+    EntityManager --> EntityTransaction : manages
+    EntityManager --> Query : creates
+    EntityManager --> Entity : persists, finds, merges, removes
+    Query --> Entity : retrieves
+
+```
+
+### ORM组件
+
+对象-关系映射的核心——映射orm.xml
+
+能将数据类型 转换 为关系类型。特性是将一个对象映射或绑定到它在数据库中的数据。映射时，必须考虑数据，数据类型及其自身实体或任何其他表中的实体关系
+
+### CDN（Content Delivery Network）
+
+利用分布式节点技术，在全球部署服务器分发内容，降低访问延迟和提高稳定性，缩短数据传输距离
+
+> [!NOTE]
+>
+> CDN与镜像服务器的区别
+>
+> - 镜像服务器是源内容的完整复制
+> - CDN是部分内容的缓存，智能程度更好。CND=更智能的镜像+缓存+流量引导
+
+### 系统组成
+
+| 源服务器Origin Server   | 中心节点                                                     |
+| ----------------------- | ------------------------------------------------------------ |
+| 边缘服务器Edge Server   |                                                              |
+| 负载均衡器Load Balancer | 在多个边缘服务器之间均衡分配用请求流量。它根据不同算法（如轮询、最少连接等）将请求导向最优边缘服务器，以实现负载均衡和高可用性 |
+| 缓存机制                |                                                              |
+| DNS                     | 解析用户请求的域名并将其映射到最近的边缘服务器（访问过程依赖的基础，**重定向** 技术 |
+| 内容管理系统            |                                                              |
+
+相同的拓扑结构，图算法在这里能够大显神通
+
