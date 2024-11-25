@@ -23,7 +23,10 @@ public enum ErrorCode {
     FRIEND_APPLICATION_SOLVED(HttpStatus.CONFLICT, 116, "Friend application solved"),
     CHAT_NOT_EXIST(HttpStatus.NOT_FOUND,117,"Chat not exist"),
     CHAT_NOT_GROUP(HttpStatus.UNAUTHORIZED,118,"Permission denied"),
-    INVITAIOIN_ALREADY_EXIST(HttpStatus.CONFLICT,119,"Invitation already in use"),;
+    INVITATION_ALREADY_EXIST(HttpStatus.CONFLICT,119,"Invitation already in use"),
+    INVITATION_NOT_EXIST(HttpStatus.CONFLICT,120,"Invitation does not exist"),
+    INVITATION_SOLVED(HttpStatus.CONFLICT,121,"Invitation already solved"),
+    GROUP_APPLICATION_NOT_EXIST(HttpStatus.CONFLICT,122,"Group application not exist"),;
 
     private final HttpStatus status;
     private final int code;

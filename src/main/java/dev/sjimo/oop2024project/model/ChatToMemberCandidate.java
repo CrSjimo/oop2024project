@@ -12,7 +12,7 @@ public class ChatToMemberCandidate {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    private User user;              //被邀请的用户
 
     @ManyToOne
     @JoinColumn(name = "chat_id",nullable = false)
@@ -20,7 +20,7 @@ public class ChatToMemberCandidate {
 
     @ManyToOne
     @JoinColumn(name = "issuer_id",nullable = false)
-    private User issuer;
+    private User issuer;            //邀请的群管理员
 
     private String message;
     private LocalDateTime createdDate;

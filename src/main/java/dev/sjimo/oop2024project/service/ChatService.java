@@ -2,11 +2,16 @@ package dev.sjimo.oop2024project.service;
 
 import dev.sjimo.oop2024project.model.*;
 import dev.sjimo.oop2024project.payload.ChatResponse;
+import dev.sjimo.oop2024project.payload.ChatToMemberCandidateResponse;
+import dev.sjimo.oop2024project.payload.FriendCandidateResponse;
+import dev.sjimo.oop2024project.payload.MemberToChatCandidateResponse;
 import dev.sjimo.oop2024project.repository.*;
 import dev.sjimo.oop2024project.utils.ErrorCode;
 import dev.sjimo.oop2024project.utils.ResponseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class ChatService {
@@ -58,24 +63,34 @@ public class ChatService {
         return new ChatResponse(chat.getId(), chat.getName(), chat.getType(), null, null);
     }
 
-    public void sendInvitation(Long issuerId, Long userId,Long chatId,String message) {
+    //用户加入群聊
+    private void joinGroupChat(User user, Chat chat) {
+        ChatMember chatMemberEntity = new ChatMember();
+        chatMemberEntity.setChat(chat);
+        chatMemberEntity.setUser(user);
+        chatMemberEntity.setMemberType(ChatMember.MemberType.REGULAR_MEMBER);
+        chatMemberRepository.save(chatMemberEntity);
+    }
+
+    //群向用户发送邀请
+    public void sendInvitation(Long issuerId, Long userId, Long chatId, String message) {
         User sender = userRepository.findById(issuerId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));//判读发送者是否存在
         if (!sender.isVerified())
             throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
         User user = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
         if (!user.isVerified())
             throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
-        Chat chat = chatRepository.findById(chatId).orElseThrow(()->new ResponseException(ErrorCode.CHAT_NOT_EXIST));
+        Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new ResponseException(ErrorCode.CHAT_NOT_EXIST));
 
-        ChatMember chatMember = chatMemberRepository.findByUser_IdAndChat_Id(issuerId,chatId)
-                .filter(cm -> cm.getMemberType() == ChatMember.MemberType.GROUP_OWNER || cm.getMemberType() == ChatMember.MemberType.Administrator)
-                .orElseThrow(()->new ResponseException(ErrorCode.PERMISSION_DENIED));
+        ChatMember chatMember = chatMemberRepository.findByUser_IdAndChat_Id(issuerId, chatId)
+                .filter(cm -> cm.getMemberType() == ChatMember.MemberType.GROUP_OWNER || cm.getMemberType() == ChatMember.MemberType.ADMINISTRATOR)
+                .orElseThrow(() -> new ResponseException(ErrorCode.PERMISSION_DENIED));
 
-        if (chat.getType()!=Chat.Type.GROUP_CHAT)
+        if (chat.getType() != Chat.Type.GROUP_CHAT)
             throw new ResponseException(ErrorCode.CHAT_NOT_GROUP);
 
         if (chatToMemberCandidateRepository.existsByUser_IdAndChat_IdAndStatus(userId, chatId, ChatToMemberCandidate.Status.PENDING)) {
-            throw new ResponseException(ErrorCode.INVITAIOIN_ALREADY_EXIST);
+            throw new ResponseException(ErrorCode.INVITATION_ALREADY_EXIST);
         }
 
         if (chatMemberRepository.existsByUser_IdAndChat_Id(chatId, userId)) {
@@ -84,11 +99,7 @@ public class ChatService {
 
         var memberToChatCandidate = memberToChatCandidateRepository.findByUser_IdAndChat_Id(userId, chatId);
         if (memberToChatCandidate.isPresent()) {
-            ChatMember chatMemberEntity = new ChatMember();
-            chatMemberEntity.setChat(chat);
-            chatMemberEntity.setUser(user);
-            chatMemberEntity.setMemberType(ChatMember.MemberType.REGULAR_MEMBER);
-            chatMemberRepository.save(chatMemberEntity);
+            joinGroupChat(user, chat);
             return;
         }
         ChatToMemberCandidate chatToMemberCandidateEntity = new ChatToMemberCandidate();
@@ -101,18 +112,18 @@ public class ChatService {
     }
 
     //申请加入群聊
-    public void ApplyToJoinGroup(Long userId,Long chatId,String message){
+    public void ApplyToJoinGroup(Long userId, Long chatId, String message) {
         User user = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
-        if (!user.isVerified()){
+        if (!user.isVerified()) {
             throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
         }
         Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new ResponseException(ErrorCode.CHAT_NOT_EXIST));
 
-        if (chat.getType()!=Chat.Type.GROUP_CHAT)
+        if (chat.getType() != Chat.Type.GROUP_CHAT)
             throw new ResponseException(ErrorCode.CHAT_NOT_GROUP);
 
         if (chatToMemberCandidateRepository.existsByUser_IdAndChat_IdAndStatus(userId, chatId, ChatToMemberCandidate.Status.PENDING)) {
-            throw new ResponseException(ErrorCode.INVITAIOIN_ALREADY_EXIST);
+            throw new ResponseException(ErrorCode.INVITATION_ALREADY_EXIST);
         }
 
         if (chatMemberRepository.existsByUser_IdAndChat_Id(chatId, userId)) {
@@ -121,11 +132,7 @@ public class ChatService {
 
         var chatToMemberCandidate = chatToMemberCandidateRepository.findByUser_IdAndChat_Id(userId, chatId);
         if (chatToMemberCandidate.isPresent()) {
-            ChatMember chatMemberEntity = new ChatMember();
-            chatMemberEntity.setChat(chat);
-            chatMemberEntity.setUser(user);
-            chatMemberEntity.setMemberType(ChatMember.MemberType.REGULAR_MEMBER);
-            chatMemberRepository.save(chatMemberEntity);
+            joinGroupChat(user, chat);
             return;
         }
         MemberToChatCandidate memberToChatCandidateEntity = new MemberToChatCandidate();
@@ -134,4 +141,202 @@ public class ChatService {
         memberToChatCandidateEntity.setStatus(MemberToChatCandidate.Status.PENDING);
         memberToChatCandidateRepository.save(memberToChatCandidateEntity);
     }
+
+    /**
+     * 用户接受群的邀请
+     *
+     * @param userId 传入的应该是用户的id
+     * @return
+     */
+    public void acceptChatInvitation(Long userId, Long chatToMemberCandidateId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
+        if (!user.isVerified())
+            throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
+        ChatToMemberCandidate chatToMemberCandidate = chatToMemberCandidateRepository.findById(chatToMemberCandidateId).orElseThrow(() -> new ResponseException(ErrorCode.INVITATION_NOT_EXIST));
+        if (chatToMemberCandidate.getUser() != user)
+            throw new ResponseException(ErrorCode.INVITATION_NOT_EXIST);
+        if (chatToMemberCandidate.getStatus() != ChatToMemberCandidate.Status.PENDING)
+            throw new ResponseException(ErrorCode.INVITATION_SOLVED);
+        chatToMemberCandidate.setStatus(ChatToMemberCandidate.Status.ACCEPTED);
+        chatToMemberCandidateRepository.save(chatToMemberCandidate);
+        joinGroupChat(user, chatToMemberCandidate.getChat());
+    }
+
+    /**
+     * 用户拒绝群的邀请
+     *
+     * @param userId 传入的应该是用户的id
+     * @return
+     */
+    public void rejectChatInvitation(Long userId, Long chatToMemberCandidateId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
+        if (!user.isVerified())
+            throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
+        ChatToMemberCandidate chatToMemberCandidate = chatToMemberCandidateRepository.findById(chatToMemberCandidateId).orElseThrow(() -> new ResponseException(ErrorCode.INVITATION_NOT_EXIST));
+        if (chatToMemberCandidate.getUser() != user)
+            throw new ResponseException(ErrorCode.INVITATION_NOT_EXIST);
+        if (chatToMemberCandidate.getStatus() != ChatToMemberCandidate.Status.PENDING)
+            throw new ResponseException(ErrorCode.INVITATION_SOLVED);
+        chatToMemberCandidate.setStatus(ChatToMemberCandidate.Status.REJECTED);
+        chatToMemberCandidateRepository.save(chatToMemberCandidate);
+    }
+
+    /**
+     * 群接受用户的申请
+     *
+     * @param userId 传入的应该是群管理员的id
+     * @return
+     */
+    public void acceptChatApplication(Long userId, Long memberToChatCandidateId) {
+        MemberToChatCandidate memberToChatCandidate = memberToChatCandidateRepository.findById(memberToChatCandidateId).orElseThrow(() -> new ResponseException(ErrorCode.GROUP_APPLICATION_NOT_EXIST));
+
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
+        if (!user.isVerified())
+            throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
+        ChatMember chatMember = chatMemberRepository.findByUser_IdAndChat_Id(userId, memberToChatCandidate.getChat().getId())
+                .filter(cm -> cm.getMemberType() == ChatMember.MemberType.GROUP_OWNER || cm.getMemberType() == ChatMember.MemberType.ADMINISTRATOR)
+                .orElseThrow(() -> new ResponseException(ErrorCode.PERMISSION_DENIED));
+
+        memberToChatCandidate.setStatus(MemberToChatCandidate.Status.ACCEPTED);
+        memberToChatCandidateRepository.save(memberToChatCandidate);
+        joinGroupChat(memberToChatCandidate.getUser(), memberToChatCandidate.getChat());
+    }
+
+    /**
+     * 群拒绝用户的申请
+     *
+     * @param userId 传入的应该是群管理员的id
+     * @return
+     */
+    public void rejectChatApplication(Long userId, Long memberToChatCandidateId) {
+        MemberToChatCandidate memberToChatCandidate = memberToChatCandidateRepository.findById(memberToChatCandidateId).orElseThrow(() -> new ResponseException(ErrorCode.GROUP_APPLICATION_NOT_EXIST));
+
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
+        if (!user.isVerified())
+            throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
+        ChatMember chatMember = chatMemberRepository.findByUser_IdAndChat_Id(userId, memberToChatCandidate.getChat().getId())
+                .filter(cm -> cm.getMemberType() == ChatMember.MemberType.GROUP_OWNER || cm.getMemberType() == ChatMember.MemberType.ADMINISTRATOR)
+                .orElseThrow(() -> new ResponseException(ErrorCode.PERMISSION_DENIED));
+
+        memberToChatCandidate.setStatus(MemberToChatCandidate.Status.REJECTED);
+        memberToChatCandidateRepository.save(memberToChatCandidate);
+    }
+
+    /**
+     * 获取自己发给群的加群申请
+     *
+     * @param userId 自己的userId
+     * @return
+     */
+    public List<MemberToChatCandidateResponse> getSelfGroupChatApplication(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
+        if (!user.isVerified()) {
+            throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
+        }
+        var memberToChatCandidates = memberToChatCandidateRepository.findAllByUser_IdOrderByCreatedDate(userId);
+        return memberToChatCandidates.stream().map(memberToChatCandidate -> {
+            MemberToChatCandidateResponse memberToChatCandidateResponse = new MemberToChatCandidateResponse();
+            memberToChatCandidateResponse.setId(memberToChatCandidate.getId());
+            memberToChatCandidateResponse.setCreatedDate(memberToChatCandidate.getCreatedDate());
+            memberToChatCandidateResponse.setUserId(memberToChatCandidate.getUser().getId());
+            memberToChatCandidateResponse.setChatId(memberToChatCandidate.getChat().getId());
+            memberToChatCandidateResponse.setMessage(memberToChatCandidate.getMessage());
+            memberToChatCandidateResponse.setStatus(memberToChatCandidate.getStatus());
+            return memberToChatCandidateResponse;
+        }).toList();
+    }
+
+    /**
+     * 获取群发给自己的加群申请
+     *
+     * @param userId 自己的userId
+     * @return
+     */
+    public List<ChatToMemberCandidateResponse> getGroupChatApplication(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
+        if (!user.isVerified()) {
+            throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
+        }
+        var chatToMemberCandidates = chatToMemberCandidateRepository.findAllByUser_IdOrderByCreatedDate(userId);
+        return chatToMemberCandidates.stream().map(chatToMemberCandidate ->{
+            ChatToMemberCandidateResponse chatToMemberCandidateResponse = new ChatToMemberCandidateResponse();
+            chatToMemberCandidateResponse.setId(chatToMemberCandidate.getId());
+            chatToMemberCandidateResponse.setCreatedDate(chatToMemberCandidate.getCreatedDate());
+            chatToMemberCandidateResponse.setUserId(chatToMemberCandidate.getUser().getId());
+            chatToMemberCandidateResponse.setIssuerId(chatToMemberCandidate.getIssuer().getId());
+            chatToMemberCandidateResponse.setChatId(chatToMemberCandidate.getChat().getId());
+            chatToMemberCandidateResponse.setMessage(chatToMemberCandidate.getMessage());
+            chatToMemberCandidateResponse.setStatus(chatToMemberCandidate.getStatus());
+            return chatToMemberCandidateResponse;
+        }).toList();
+    }
+    /**
+     * 获取群发给用户的邀请
+     * @param userId 拥有管理员权限的用户的id
+     * @param chatId 群聊的id
+     */
+    public List<ChatToMemberCandidateResponse> getGroupChatInvitation(Long userId,Long chatId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
+        if (!user.isVerified())
+            throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
+        ChatMember chatMember = chatMemberRepository.findByUser_IdAndChat_Id(userId, chatId)
+                .filter(cm -> cm.getMemberType() == ChatMember.MemberType.GROUP_OWNER || cm.getMemberType() == ChatMember.MemberType.ADMINISTRATOR)
+                .orElseThrow(() -> new ResponseException(ErrorCode.PERMISSION_DENIED));
+        var chatToMemberCandidates = chatToMemberCandidateRepository.findAllByChat_IdOrderByCreatedDate(chatId);
+        return chatToMemberCandidates.stream().map(chatToMemberCandidate ->{
+            ChatToMemberCandidateResponse chatToMemberCandidateResponse = new ChatToMemberCandidateResponse();
+            chatToMemberCandidateResponse.setId(chatToMemberCandidate.getId());
+            chatToMemberCandidateResponse.setCreatedDate(chatToMemberCandidate.getCreatedDate());
+            chatToMemberCandidateResponse.setUserId(chatToMemberCandidate.getUser().getId());
+            chatToMemberCandidateResponse.setIssuerId(chatToMemberCandidate.getIssuer().getId());
+            chatToMemberCandidateResponse.setChatId(chatToMemberCandidate.getChat().getId());
+            chatToMemberCandidateResponse.setMessage(chatToMemberCandidate.getMessage());
+            chatToMemberCandidateResponse.setStatus(chatToMemberCandidate.getStatus());
+            return chatToMemberCandidateResponse;
+        }).toList();
+    }
+    /**
+     * 获取用户发给群的邀请
+     * @param userId 拥有管理员权限的用户的id
+     * @param chatId 群聊的id
+     */
+    public List<MemberToChatCandidateResponse> getUserApplication(Long userId,Long chatId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
+        if (!user.isVerified())
+            throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
+        ChatMember chatMember = chatMemberRepository.findByUser_IdAndChat_Id(userId, chatId)
+                .filter(cm -> cm.getMemberType() == ChatMember.MemberType.GROUP_OWNER || cm.getMemberType() == ChatMember.MemberType.ADMINISTRATOR)
+                .orElseThrow(() -> new ResponseException(ErrorCode.PERMISSION_DENIED));
+        var memberToChatCandidates = memberToChatCandidateRepository.findAllByChat_IdOrderByCreatedDate(userId);
+        return memberToChatCandidates.stream().map(memberToChatCandidate -> {
+            MemberToChatCandidateResponse memberToChatCandidateResponse = new MemberToChatCandidateResponse();
+            memberToChatCandidateResponse.setId(memberToChatCandidate.getId());
+            memberToChatCandidateResponse.setCreatedDate(memberToChatCandidate.getCreatedDate());
+            memberToChatCandidateResponse.setUserId(memberToChatCandidate.getUser().getId());
+            memberToChatCandidateResponse.setChatId(memberToChatCandidate.getChat().getId());
+            memberToChatCandidateResponse.setMessage(memberToChatCandidate.getMessage());
+            memberToChatCandidateResponse.setStatus(memberToChatCandidate.getStatus());
+            return memberToChatCandidateResponse;
+        }).toList();
+    }
+    /**
+     * 转让群主
+     */
+
+    /**
+     * 授予管理员权限
+     *
+     */
+
+    /**
+     * 移除管理员权限
+     */
+
+    /**
+     * 踢出群成员
+     */
+
+    /**
+     * 解散群聊
+     */
 }

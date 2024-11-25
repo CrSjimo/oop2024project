@@ -12,7 +12,7 @@ public class MemberToChatCandidate {
 
     @ManyToOne
     @JoinColumn(name = "user_id",nullable = false)
-    private User user;
+    private User user;          //申请加群用户
 
     @ManyToOne
     @JoinColumn(name = "chat_id",nullable = false)

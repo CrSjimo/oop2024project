@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 public class ChatMember {
     public enum MemberType {
         GROUP_OWNER,
-        Administrator,
+        ADMINISTRATOR,
         REGULAR_MEMBER
     }
 

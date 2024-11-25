@@ -12,10 +12,10 @@ public class FriendCandidate {
 
     @ManyToOne
     @JoinColumn(name = "user1_id",nullable = false)
-    private User user1;
+    private User user1;         //发出申请的用户
     @ManyToOne
     @JoinColumn(name = "user2_id",nullable = false)
-    private User user2;
+    private User user2;         //接到申请的用户
     private LocalDateTime createdDate;
     private String message;
     @Enumerated(EnumType.ORDINAL)

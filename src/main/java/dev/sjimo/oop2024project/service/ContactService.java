@@ -28,6 +28,22 @@ public class ContactService {
     @Autowired
     private UserRepository userRepository;
 
+    /**
+     * 将两个用户建立friend关系
+     */
+    private void beFriend(User user1, User user2) {
+        Friend friend = new Friend();
+        friend.setUser1(user1);
+        friend.setUser2(user2);
+        friendRepository.save(friend);
+    }
+
+    /**
+     * 发送添加好友申请
+     *
+     * @param userId   发送申请的用户的id
+     * @param friendId 希望成为好友的用户id
+     */
     public void addFriend(Long userId, Long friendId, String message) {
         User user = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
         User friend = userRepository.findById(friendId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
@@ -54,7 +70,7 @@ public class ContactService {
             throw new ResponseException(ErrorCode.ALREADY_BE_FRIEND);
         }
 
-        if (friendCandidateRepository.existsByUser1_IdAndUser2_IdAndStatus(userId,friendId, FriendCandidate.Status.PENDING)){
+        if (friendCandidateRepository.existsByUser1_IdAndUser2_IdAndStatus(userId, friendId, FriendCandidate.Status.PENDING)) {
             throw new ResponseException(ErrorCode.FRIEND_APPLICATION_PENDING);
         }
 
@@ -62,10 +78,7 @@ public class ContactService {
         if (friendCandidate.isPresent()) {
             friendCandidate.get().setStatus(FriendCandidate.Status.ACCEPTED);
             friendCandidateRepository.save(friendCandidate.get());
-            Friend friendEntry = new Friend();
-            friendEntry.setUser1(user);
-            friendEntry.setUser2(friend);
-            friendRepository.save(friendEntry);
+            beFriend(user, friend);
             return;
         }
         FriendCandidate friendCandidateEntry = new FriendCandidate();
@@ -148,9 +161,15 @@ public class ContactService {
         }
         blockListRepository.delete(blockEntry.get());
     }
-    public void acceptFriendApplication(Long user1Id, Long friendCandidateId) {
+
+    /**
+     * 接受好友申请
+     *
+     * @param userId 传入处理申请的用户的id
+     */
+    public void acceptFriendApplication(Long userId, Long friendCandidateId) {
         var friendCandidate = friendCandidateRepository.findById(friendCandidateId).orElseThrow(() -> new ResponseException(ErrorCode.FRIEND_APPLICATION_NOT_EXIST));
-        if (!friendCandidate.getUser1().getId().equals(user1Id)) {
+        if (!friendCandidate.getUser2().getId().equals(userId)) {
             throw new ResponseException(ErrorCode.FRIEND_APPLICATION_NOT_EXIST);
         }
         if (friendCandidate.getStatus() != FriendCandidate.Status.PENDING) {
@@ -158,12 +177,17 @@ public class ContactService {
         }
         friendCandidate.setStatus(FriendCandidate.Status.ACCEPTED);
         friendCandidateRepository.save(friendCandidate);
-        addFriend(friendCandidate.getUser1().getId(), friendCandidate.getUser2().getId(), null);
+        beFriend(friendCandidate.getUser1(), friendCandidate.getUser2());
     }
 
-    public void rejectFriendApplication(Long user1Id, Long friendCandidateId) {
+    /**
+     * 拒绝好友申请
+     *
+     * @param userId 传入处理申请的用户的id
+     */
+    public void rejectFriendApplication(Long userId, Long friendCandidateId) {
         var friendCandidate = friendCandidateRepository.findById(friendCandidateId).orElseThrow(() -> new ResponseException(ErrorCode.FRIEND_APPLICATION_NOT_EXIST));
-        if (!friendCandidate.getUser1().getId().equals(user1Id)) {
+        if (!friendCandidate.getUser2().getId().equals(userId)) {
             throw new ResponseException(ErrorCode.FRIEND_APPLICATION_NOT_EXIST);
         }
         if (friendCandidate.getStatus() != FriendCandidate.Status.PENDING) {
@@ -175,6 +199,7 @@ public class ContactService {
 
     /**
      * 获取自己发给别人的好友申请
+     *
      * @param userId 自己的userId
      * @return
      */
@@ -194,8 +219,10 @@ public class ContactService {
             return friendCandidateResponse;
         }).toList();
     }
+
     /**
      * 获取别人发给自己的好友申请
+     *
      * @param userId 自己的userId
      * @return
      */
