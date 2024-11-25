@@ -16,8 +16,19 @@ public class Message {
     @ManyToOne
     @JoinColumn(name = "chat_id",nullable = false)
     private Chat chat;
-
+    private String message;
     private LocalDateTime createdDate;
+
+    @Enumerated(EnumType.ORDINAL)
+    private Status status;
+
+    public enum Status {
+        UNREAD,
+        SENTING,
+        READ,
+    }
+
+
 
     public Long getId() {
         return id;
@@ -37,6 +48,17 @@ public class Message {
     public LocalDateTime getCreatedDate() {
         return createdDate;
     }
+    public Status getStatus() {
+        return status;
+    }
+    public void setStatus(Status status) {
+        this.status = status;
+    }
 
-
+    public void setMessage(String message) {
+        this.message = message;
+    }
+    public void setCreatedDate(LocalDateTime createdDate) {
+        this.createdDate = createdDate;
+    }
 }

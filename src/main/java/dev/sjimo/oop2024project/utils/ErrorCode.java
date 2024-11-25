@@ -26,7 +26,10 @@ public enum ErrorCode {
     INVITATION_ALREADY_EXIST(HttpStatus.CONFLICT,119,"Invitation already in use"),
     INVITATION_NOT_EXIST(HttpStatus.CONFLICT,120,"Invitation does not exist"),
     INVITATION_SOLVED(HttpStatus.CONFLICT,121,"Invitation already solved"),
-    GROUP_APPLICATION_NOT_EXIST(HttpStatus.CONFLICT,122,"Group application not exist"),;
+    GROUP_APPLICATION_NOT_EXIST(HttpStatus.CONFLICT,122,"Group application not exist"),
+    MESSAGE_ALREADY_EXIST(HttpStatus.CONFLICT,123,"Message already exist"),
+    MESSAGE_NOT_EXIST(HttpStatus.CONFLICT,124,"Message not exist"),
+    MESSAGE_TOO_OLD(HttpStatus.CONFLICT,125,"Message too old"),;
 
     private final HttpStatus status;
     private final int code;
