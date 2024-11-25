@@ -4,9 +4,10 @@ import dev.sjimo.oop2024project.model.Chat;
 import dev.sjimo.oop2024project.model.ChatMember;
 import dev.sjimo.oop2024project.model.User;
 import dev.sjimo.oop2024project.model.Message;
+import dev.sjimo.oop2024project.payload.MessageResponse;
 import dev.sjimo.oop2024project.repository.ChatMemberRepository;
 import dev.sjimo.oop2024project.repository.ChatRepository;
-import dev.sjimo.oop2024project.repository.MessageListRepository;
+import dev.sjimo.oop2024project.repository.MessageRepository;
 import dev.sjimo.oop2024project.repository.UserRepository;
 import dev.sjimo.oop2024project.utils.ErrorCode;
 import dev.sjimo.oop2024project.utils.ResponseException;
@@ -20,7 +21,7 @@ import java.util.Optional;
 @Service
 public class MessageService {
     @Autowired
-    MessageListRepository messageListRepository;
+    MessageRepository messageRepository;
 
     @Autowired
     UserRepository userRepository;
@@ -47,42 +48,31 @@ public class MessageService {
         ChatMember chatMember = chatMemberRepository.findByUser_IdAndChat_Id(userId,chatId)
                 .orElseThrow(()-> new ResponseException(ErrorCode.PERMISSION_DENIED));
 
-        Message messageEitity = new Message();
-        messageEitity.setChat(chat);
-        messageEitity.setStatus(Message.Status.UNREAD);
-        messageEitity.setUser(user);
-        messageEitity.setMessage(message);
-        return messageListRepository.save(messageEitity);
+        Message messageEntity = new Message();
+        messageEntity.setChat(chat);
+        messageEntity.setStatus(Message.Status.UNREAD);
+        messageEntity.setUser(user);
+        messageEntity.setMessage(message);
+        return messageRepository.save(messageEntity);
     }
 
     /**
      * 消息撤回
      * @param userId
-     * @param chatId
      * @param messageId
      */
-    public void revokeMessage(Long userId,Long chatId,Long messageId) {
+    public void revokeMessage(Long userId,Long messageId) {
         User user = userRepository.findById(userId).orElseThrow(()-> new ResponseException(ErrorCode.USER_NOT_EXIST));
         if (!user.isVerified())
             throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
 
-        Chat chat = chatRepository.findById(chatId).orElseThrow(()-> new ResponseException(ErrorCode.CHAT_NOT_EXIST));
+        Message message = messageRepository.findById(messageId).orElseThrow(()-> new ResponseException(ErrorCode.MESSAGE_NOT_EXIST));
 
-        ChatMember chatMember = chatMemberRepository.findByUser_IdAndChat_Id(userId,chatId)
-                .orElseThrow(()-> new ResponseException(ErrorCode.PERMISSION_DENIED));
-
-        // 检查消息是否存在
-        Optional<Message> optionalMessage = messageListRepository.findByMessage_IdAndChat_Id(messageId,chatId);
-
-        if (!optionalMessage.isPresent()) {
-            throw new ResponseException(ErrorCode.MESSAGE_NOT_EXIST);
-        }
-
-        Message message = optionalMessage.get();
         //验证发送者
         if (!message.getUser().equals(user)) {
             throw new ResponseException(ErrorCode.PERMISSION_DENIED);
         }
+
         //验证时间
         LocalDateTime now = LocalDateTime.now();
         Duration duration = Duration.between(message.getCreatedDate(), now);
@@ -91,8 +81,8 @@ public class MessageService {
         if (minutes >= 1) {
             throw new ResponseException(ErrorCode.MESSAGE_TOO_OLD);
         }
-        //delelte
-        messageListRepository.delete(message);
+        //delete
+        messageRepository.delete(message);
     }
 
     /**
@@ -112,13 +102,13 @@ public class MessageService {
                 .filter(cm -> cm.getMemberType() == ChatMember.MemberType.GROUP_OWNER || cm.getMemberType() == ChatMember.MemberType.ADMINISTRATOR)
                 .orElseThrow(()-> new ResponseException(ErrorCode.PERMISSION_DENIED));
 
-        Message messageEitity = new Message();
-        messageEitity.setChat(chat);
-        messageEitity.setStatus(Message.Status.UNREAD);
-        messageEitity.setUser(user);
-        messageEitity.setMessage(message);
-        messageEitity.setCreatedDate(LocalDateTime.now());
-        return messageListRepository.save(messageEitity);
+        Message messageEntity = new Message();
+        messageEntity.setChat(chat);
+        messageEntity.setStatus(Message.Status.UNREAD);
+        messageEntity.setUser(user);
+        messageEntity.setMessage(message);
+        messageEntity.setCreatedDate(LocalDateTime.now());
+        return messageRepository.save(messageEntity);
     }
 
     /**
@@ -137,36 +127,33 @@ public class MessageService {
         ChatMember chatMember = chatMemberRepository.findByUser_IdAndChat_Id(userId,chatId)
                 .filter(cm -> cm.getMemberType() == ChatMember.MemberType.GROUP_OWNER || cm.getMemberType() == ChatMember.MemberType.ADMINISTRATOR)
                 .orElseThrow(()-> new ResponseException(ErrorCode.PERMISSION_DENIED));
-        if (messageListRepository.existsByMessage_IdAndChat_IdAndSattus(messageId,chatId)){
-            throw new ResponseException(ErrorCode.MESSAGE_ALREADY_EXIST);
-        }
 
-        Optional<Message> optionalMessage = messageListRepository.findByMessage_IdAndChat_Id(messageId,chatId);
-
-        if (optionalMessage.isPresent()){
-            messageListRepository.delete(optionalMessage.get());
-        }else {
-            throw new ResponseException(ErrorCode.MESSAGE_NOT_EXIST);
+        Message message = messageRepository.findById(messageId).orElseThrow(()-> new ResponseException(ErrorCode.MESSAGE_NOT_EXIST));
+        if (!message.getChat().equals(chat)) {
+            throw new ResponseException(ErrorCode.PERMISSION_DENIED);
         }
+        messageRepository.delete(message);
     }
 
     /**
-     * 获取消息
+     * 获取指定的消息？
      * @param userId
      * @param chatId
      * @param messageId
      */
-    public Message getMessage(Long userId, Long chatId, Long messageId) {
+    public MessageResponse getMessage(Long userId, Long chatId, Long messageId) {
         User user = userRepository.findById(userId).orElseThrow(()-> new ResponseException(ErrorCode.USER_NOT_EXIST));
         if (!user.isVerified())
             throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
 
         Chat chat = chatRepository.findById(chatId).orElseThrow(()-> new ResponseException(ErrorCode.CHAT_NOT_EXIST));
 
-        ChatMember chatMember = chatMemberRepository.findByUser_IdAndChat_Id(userId,chatId)
-                .filter(cm -> cm.getMemberType() == ChatMember.MemberType.GROUP_OWNER || cm.getMemberType() == ChatMember.MemberType.ADMINISTRATOR)
-                .orElseThrow(()-> new ResponseException(ErrorCode.PERMISSION_DENIED));
-        return messageListRepository.findByMessage_IdAndChat_Id(messageId,chatId)
-                .orElseThrow(()->new ResponseException(ErrorCode.MESSAGE_NOT_EXIST));
+        ChatMember chatMember = chatMemberRepository.findByUser_IdAndChat_Id(userId,chatId).orElseThrow(()-> new ResponseException(ErrorCode.PERMISSION_DENIED));
+        Message message = messageRepository.findById(messageId).orElseThrow(()-> new ResponseException(ErrorCode.MESSAGE_NOT_EXIST));
+
+        if (!message.getChat().equals(chat)) {
+            throw new ResponseException(ErrorCode.PERMISSION_DENIED);
+        }
+        return new MessageResponse(messageId,message.getMessage(),message.getUser(),chat,message.getCreatedDate(),message.getStatus());
     }
 }

@@ -1,6 +1,7 @@
 package dev.sjimo.oop2024project.controller;
 
 import dev.sjimo.oop2024project.model.Message;
+import dev.sjimo.oop2024project.payload.MessageResponse;
 import dev.sjimo.oop2024project.service.MessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -17,11 +18,11 @@ public class MessageController {
     }
     @DeleteMapping("/{messageId}")
     public void revokeMessage(@RequestParam Long userId, @RequestParam Long chatId, @PathVariable Long messageId) {
-        messageService.revokeMessage(userId, chatId, messageId);
+        messageService.revokeMessage(userId, messageId);
     }
 
     @GetMapping("/{messageId}")
-    public Message getMessage(@RequestParam Long userId, @RequestParam Long chatId, @PathVariable Long messageId) {
+    public MessageResponse getMessage(@RequestParam Long userId, @RequestParam Long chatId, @PathVariable Long messageId) {
         return messageService.getMessage(userId, chatId, messageId);
     }
     // announcement

@@ -24,7 +24,7 @@ public class Message {
 
     public enum Status {
         UNREAD,
-        SENTING,
+        SENDING,
         READ,
     }
 
@@ -53,6 +53,10 @@ public class Message {
     }
     public void setStatus(Status status) {
         this.status = status;
+    }
+
+    public String getMessage() {
+        return message;
     }
 
     public void setMessage(String message) {
