@@ -112,7 +112,7 @@ public class ChatService {
     }
 
     //申请加入群聊
-    public void ApplyToJoinGroup(Long userId, Long chatId, String message) {
+    public void applyToJoinGroup(Long userId, Long chatId, String message) {
         User user = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
         if (!user.isVerified()) {
             throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
