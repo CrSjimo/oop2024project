@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController("/chat")
+@RestController("/api/chat")
 public class ChatController {
 
     @Autowired
