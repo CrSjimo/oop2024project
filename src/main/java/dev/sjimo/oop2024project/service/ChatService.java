@@ -3,7 +3,6 @@ package dev.sjimo.oop2024project.service;
 import dev.sjimo.oop2024project.model.*;
 import dev.sjimo.oop2024project.payload.ChatResponse;
 import dev.sjimo.oop2024project.payload.ChatToMemberCandidateResponse;
-import dev.sjimo.oop2024project.payload.FriendCandidateResponse;
 import dev.sjimo.oop2024project.payload.MemberToChatCandidateResponse;
 import dev.sjimo.oop2024project.repository.*;
 import dev.sjimo.oop2024project.utils.ErrorCode;
@@ -321,22 +320,94 @@ public class ChatService {
     }
     /**
      * 转让群主
+     * @param ownerId 群主id
+     * @param newOwnerId 被转让用户id
      */
+    public void changeGroupOwner(Long ownerId,Long newOwnerId, Long chatId) {
+        User owner = userRepository.findById(ownerId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
+        User newOwner = userRepository.findById(newOwnerId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
+        if (!owner.isVerified() || !newOwner.isVerified())
+            throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
+        ChatMember ownerChatMember = chatMemberRepository.findByUser_IdAndChat_Id(ownerId, chatId)
+                .filter(cm -> cm.getMemberType() == ChatMember.MemberType.GROUP_OWNER)
+                .orElseThrow(() -> new ResponseException(ErrorCode.PERMISSION_DENIED));
+        ChatMember newchatMember = chatMemberRepository.findByUser_IdAndChat_Id(newOwnerId,chatId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_IN_GROUP));
+        if (ownerId == newOwnerId)
+            throw new ResponseException(ErrorCode.PERMISSION_DENIED);
+        ownerChatMember.setMemberType(ChatMember.MemberType.REGULAR_MEMBER);
+        newchatMember.setMemberType(ChatMember.MemberType.GROUP_OWNER);
+        chatMemberRepository.save(ownerChatMember);
+        chatMemberRepository.save(newchatMember);
+    }
 
     /**
      * 授予管理员权限
      *
      */
-
+    public void grantAdministrator(Long ownerId,Long userId,Long chatId) {
+        User owner = userRepository.findById(ownerId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
+        User administrator = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
+        if (!owner.isVerified() || !administrator.isVerified())
+            throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
+        ChatMember ownerChatMember = chatMemberRepository.findByUser_IdAndChat_Id(ownerId, chatId)
+                .filter(cm -> cm.getMemberType() == ChatMember.MemberType.GROUP_OWNER)
+                .orElseThrow(() -> new ResponseException(ErrorCode.PERMISSION_DENIED));
+        ChatMember newchatMember = chatMemberRepository.findByUser_IdAndChat_Id(userId,chatId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_IN_GROUP));
+        if (newchatMember.getMemberType() != ChatMember.MemberType.REGULAR_MEMBER)
+            throw new ResponseException(ErrorCode.PERMISSION_DENIED);
+        newchatMember.setMemberType(ChatMember.MemberType.ADMINISTRATOR);
+        chatMemberRepository.save(newchatMember);
+    }
     /**
      * 移除管理员权限
      */
+    public void removeAdministrator(Long ownerId,Long administratorId,Long chatId) {
+        User owner = userRepository.findById(ownerId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
+        User administrator = userRepository.findById(administratorId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
+        if (!owner.isVerified() || !administrator.isVerified())
+            throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
+        ChatMember ownerChatMember = chatMemberRepository.findByUser_IdAndChat_Id(ownerId, chatId)
+                .filter(cm -> cm.getMemberType() == ChatMember.MemberType.GROUP_OWNER)
+                .orElseThrow(() -> new ResponseException(ErrorCode.PERMISSION_DENIED));
+        ChatMember newchatMember = chatMemberRepository.findByUser_IdAndChat_Id(administratorId,chatId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_IN_GROUP));
+        if (newchatMember.getMemberType() != ChatMember.MemberType.ADMINISTRATOR)
+            throw new ResponseException(ErrorCode.PERMISSION_DENIED);
+        newchatMember.setMemberType(ChatMember.MemberType.REGULAR_MEMBER);
+        chatMemberRepository.save(newchatMember);
+    }
 
     /**
      * 踢出群成员
      */
+    public void removeMember(Long administratorId, Long userId, Long chatId) {
+        User owner = userRepository.findById(administratorId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
+        User administrator = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
+        if (!owner.isVerified() || !administrator.isVerified())
+            throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
+        ChatMember ownerChatMember = chatMemberRepository.findByUser_IdAndChat_Id(administratorId, chatId)
+                .filter(cm -> cm.getMemberType() == ChatMember.MemberType.GROUP_OWNER || cm.getMemberType() == ChatMember.MemberType.ADMINISTRATOR)
+                .orElseThrow(() -> new ResponseException(ErrorCode.PERMISSION_DENIED));
+        ChatMember newchatMember = chatMemberRepository.findByUser_IdAndChat_Id(userId,chatId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_IN_GROUP));
+        if (newchatMember.getMemberType() != ChatMember.MemberType.REGULAR_MEMBER)
+            throw new ResponseException(ErrorCode.PERMISSION_DENIED);
+        chatMemberRepository.delete(newchatMember);
+    }
 
     /**
      * 解散群聊
      */
+    public void deleteChat(Long ownerId,Long chatId) {
+        User user = userRepository.findById(ownerId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
+        if (!user.isVerified())
+            throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
+        ChatMember chatMember = chatMemberRepository.findByUser_IdAndChat_Id(ownerId,chatId)
+                .filter(cm -> cm.getMemberType() == ChatMember.MemberType.GROUP_OWNER)
+                .orElseThrow(() -> new ResponseException(ErrorCode.PERMISSION_DENIED));
+        var chatMembers = chatMemberRepository.findAllByChat_Id(chatId);
+        for (ChatMember cm : chatMembers) {
+            chatMemberRepository.delete(cm);
+        }
+        Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new ResponseException(ErrorCode.CHAT_NOT_EXIST));
+        chatRepository.delete(chat);
+    }
 }

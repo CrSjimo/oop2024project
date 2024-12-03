@@ -29,7 +29,8 @@ public enum ErrorCode {
     GROUP_APPLICATION_NOT_EXIST(HttpStatus.CONFLICT,122,"Group application not exist"),
     MESSAGE_ALREADY_EXIST(HttpStatus.CONFLICT,123,"Message already exist"),
     MESSAGE_NOT_EXIST(HttpStatus.CONFLICT,124,"Message not exist"),
-    MESSAGE_TOO_OLD(HttpStatus.CONFLICT,125,"Message too old"),;
+    MESSAGE_TOO_OLD(HttpStatus.CONFLICT,125,"Message too old"),
+    USER_NOT_IN_GROUP(HttpStatus.CONFLICT,126,"User not in group"),;
 
     private final HttpStatus status;
     private final int code;
