@@ -23,13 +23,13 @@ public class ChatController {
         return chatService.createGroup(ownerId, createGroupRequest.getGroupName());
     }
 
-    @GetMapping("/group/{{groupId}}")
+    @GetMapping("/group/{groupId}")
     public ChatResponse getGroupInfo(@RequestHeader("Authorization") String jwtToken, @PathVariable Long groupId) {
         //TODO 获取群信息
         return null;
     }
 
-    @GetMapping("/group/{{groupId}}/users")
+    @GetMapping("/group/{groupId}/users")
     public Object/* TODO */ getGroupUsers(@RequestHeader("Authorization") String jwtToken, @PathVariable Long groupId) {
         //TODO 获取群成员列表
         return null;
@@ -37,13 +37,13 @@ public class ChatController {
 
 
 
-    @PostMapping("/group/{{groupId}}/invite/{{userId}}")
+    @PostMapping("/group/{groupId}/invite/{userId}")
     public void sendInvitation(@RequestHeader("Authorization") String jwtToken, @PathVariable Long groupId, @PathVariable Long userId, @RequestBody GroupInvitationRequest groupInvitationRequest) {
         Long issuerId = jwtService.extractUserId(jwtToken.replace("Bearer ", ""));
         chatService.sendInvitation(issuerId, userId, groupId, groupInvitationRequest.getMessage());
     }
 
-    @GetMapping("/group/{{groupId}}/invitations")
+    @GetMapping("/group/{groupId}/invitations")
     public List<ChatToMemberCandidateResponse> getGroupInvitationsOfGroup(@RequestHeader("Authorization") String jwtToken, @PathVariable Long groupId) {
         Long userId = jwtService.extractUserId(jwtToken.replace("Bearer ", ""));
         return chatService.getGroupChatInvitation(userId, groupId);
@@ -55,13 +55,13 @@ public class ChatController {
         return chatService.getGroupChatApplication(userId);
     }
 
-    @GetMapping("/group_invitation/{{chatToMemberCandidateId}}/accept")
+    @GetMapping("/group_invitation/{chatToMemberCandidateId}/accept")
     public void acceptChatInvitation(@RequestHeader("Authorization") String jwtToken, @PathVariable Long chatToMemberCandidateId) {
         Long userId = jwtService.extractUserId(jwtToken.replace("Bearer ", ""));
         chatService.acceptChatInvitation(userId, chatToMemberCandidateId);
     }
 
-    @GetMapping("/group_invitation/{{chatToMemberCandidateId}}/reject")
+    @GetMapping("/group_invitation/{chatToMemberCandidateId}/reject")
     public void rejectChatInvitation(@RequestHeader("Authorization") String jwtToken, @PathVariable Long chatToMemberCandidateId) {
         Long userId = jwtService.extractUserId(jwtToken.replace("Bearer ", ""));
         chatService.rejectChatInvitation(userId, chatToMemberCandidateId);
@@ -69,7 +69,7 @@ public class ChatController {
 
 
 
-    @PostMapping("/group/{{groupId}}/apply_for")
+    @PostMapping("/group/{groupId}/apply_for")
     public void applyToJoinGroup(@RequestHeader("Authorization") String jwtToken, @PathVariable Long groupId, @RequestBody ApplyForGroupRequest applyForGroupRequest) {
         Long userId = jwtService.extractUserId(jwtToken.replace("Bearer ", ""));
         chatService.applyToJoinGroup(userId, groupId, applyForGroupRequest.getMessage());
@@ -81,19 +81,19 @@ public class ChatController {
         return chatService.getSelfGroupChatApplication(userId);
     }
 
-    @GetMapping("/group/{{groupId}}/candidates")
+    @GetMapping("/group/{groupId}/candidates")
     public List<MemberToChatCandidateResponse> getGroupCandidatesOfGroup(@RequestHeader("Authorization") String jwtToken, @PathVariable Long groupId) {
         Long userId = jwtService.extractUserId(jwtToken.replace("Bearer ", ""));
         return chatService.getUserApplication(userId, groupId);
     }
 
-    @PostMapping("/group_candidate/{{memberToChatCandidateId}}/accept")
+    @PostMapping("/group_candidate/{memberToChatCandidateId}/accept")
     public void acceptChatApplication(@RequestHeader("Authorization") String jwtToken, @PathVariable Long memberToChatCandidateId) {
         Long userId = jwtService.extractUserId(jwtToken.replace("Bearer ", ""));
         chatService.acceptChatApplication(userId, memberToChatCandidateId);
     }
 
-    @PostMapping("/group_candidate/{{memberToChatCandidateId}}/reject")
+    @PostMapping("/group_candidate/{memberToChatCandidateId}/reject")
     public void rejectChatApplication(@RequestHeader("Authorization") String jwtToken, @PathVariable Long memberToChatCandidateId) {
         Long userId = jwtService.extractUserId(jwtToken.replace("Bearer ", ""));
         chatService.rejectChatApplication(userId, memberToChatCandidateId);
