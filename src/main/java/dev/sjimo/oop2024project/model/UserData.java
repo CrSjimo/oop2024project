@@ -1,9 +1,12 @@
 package dev.sjimo.oop2024project.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 
 @Entity
 public class UserData {
+
+    @JsonFormat(shape = JsonFormat.Shape.NUMBER)
     public enum Gender {
         OTHER,
         MALE,
