@@ -1,5 +1,6 @@
 package dev.sjimo.oop2024project.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -7,6 +8,7 @@ import java.util.Optional;
 
 @Entity
 public class Chat {
+    @JsonFormat(shape = JsonFormat.Shape.NUMBER)
     public enum Type {
         PRIVATE_CHAT,
         GROUP_CHAT,

@@ -76,11 +76,11 @@ public class UserService {
 
     public void resetPassword(Long id, String password) {
         try {
-            var user = userRepository.findById(id).orElseThrow();
+            var user = userRepository.findById(id).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
             user.setPassword(password);
             userRepository.save(user);
         } catch (NoSuchElementException e) {
-            throw new RuntimeException(e); // TODO
+            throw new RuntimeException(e);
         }
     }
 

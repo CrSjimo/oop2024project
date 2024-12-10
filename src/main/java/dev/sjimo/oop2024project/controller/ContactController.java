@@ -175,5 +175,4 @@ public class ContactController {
         }
         contactService.addFriend(user1Id, user2Id, friendRequest.getMessage());
     }
-
 }

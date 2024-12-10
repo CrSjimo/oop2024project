@@ -1,11 +1,13 @@
 package dev.sjimo.oop2024project.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 
 @Entity
 public class ChatMember {
+    @JsonFormat(shape = JsonFormat.Shape.NUMBER)
     public enum MemberType {
         GROUP_OWNER,
         ADMINISTRATOR,

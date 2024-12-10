@@ -1,5 +1,6 @@
 package dev.sjimo.oop2024project.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -23,7 +24,7 @@ public class MemberToChatCandidate {
 
     @Enumerated(EnumType.ORDINAL)
     private Status status;
-
+    @JsonFormat(shape = JsonFormat.Shape.NUMBER)
     public enum Status {
         PENDING,
         ACCEPTED,
