@@ -1,6 +1,7 @@
 package dev.sjimo.oop2024project.service;
 
 import dev.sjimo.oop2024project.model.*;
+import dev.sjimo.oop2024project.payload.ChatMemberResponse;
 import dev.sjimo.oop2024project.payload.ChatResponse;
 import dev.sjimo.oop2024project.payload.ChatToMemberCandidateResponse;
 import dev.sjimo.oop2024project.payload.MemberToChatCandidateResponse;
@@ -26,6 +27,10 @@ public class ChatService {
     ChatToMemberCandidateRepository chatToMemberCandidateRepository;
     @Autowired
     private MemberToChatCandidateRepository memberToChatCandidateRepository;
+    @Autowired
+    private UserDataService userDataService;
+    @Autowired
+    private UserDataRepository userDataRepository;
 
     public ChatResponse getPrivateChat(Long user1Id, Long user2Id) {
         User user1 = userRepository.findById(user1Id).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
@@ -43,7 +48,7 @@ public class ChatService {
             c.setUser2(user2);
             return chatRepository.save(c);
         });
-        return new ChatResponse(chat.getId(), chat.getName(), chat.getType(), chat.getUser1().map(User::getId).orElse(null), chat.getUser2().map(User::getId).orElse(null));
+        return new ChatResponse(chat.getId(), chat.getName(), chat.getType(), chat.getUser1().map(User::getId).orElse(null), chat.getUser2().map(User::getId).orElse(null),chat.getCreatedDate());
     }
 
     public ChatResponse createGroup(Long ownerId, String groupName) {
@@ -59,7 +64,7 @@ public class ChatService {
         chatMember.setChat(chat);
         chatMember.setMemberType(ChatMember.MemberType.GROUP_OWNER);
         chatMemberRepository.save(chatMember);
-        return new ChatResponse(chat.getId(), chat.getName(), chat.getType(), null, null);
+        return new ChatResponse(chat.getId(), chat.getName(), chat.getType(), null, null,chat.getCreatedDate());
     }
 
     //用户加入群聊
@@ -409,5 +414,31 @@ public class ChatService {
         }
         Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new ResponseException(ErrorCode.CHAT_NOT_EXIST));
         chatRepository.delete(chat);
+    }
+    /**
+    *   获取群信息
+    * */
+    public ChatResponse getGroupChat(Long userId,Long chatId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
+        if (!user.isVerified())
+            throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
+        Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new ResponseException(ErrorCode.CHAT_NOT_EXIST));
+        ChatMember chatMember = chatMemberRepository.findByUser_IdAndChat_Id(userId,chatId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_IN_GROUP));
+        return new ChatResponse(chat.getId(),chat.getName(),chat.getType(),null,null,chat.getCreatedDate());
+    }
+    /**
+     *  获取群成员
+     */
+    public List<ChatMemberResponse> getChatMember(Long userId, Long chatId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
+        if (!user.isVerified())
+            throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
+        Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new ResponseException(ErrorCode.CHAT_NOT_EXIST));
+        ChatMember cm = chatMemberRepository.findByUser_IdAndChat_Id(userId,chatId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_IN_GROUP));
+        var ChatMembers = chatMemberRepository.findAllByChat_Id(chatId);
+        return ChatMembers.stream().map(chatMember -> {
+            UserData userData = userDataRepository.findByUser_Id(chatMember.getUser().getId()).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
+            return new ChatMemberResponse(chatMember.getId(),chat.getName(),chatMember.getMemberType(),chat.getCreatedDate(),chatMember.getUser().getId(),userData.getUsername());
+        }).toList();
     }
 }
