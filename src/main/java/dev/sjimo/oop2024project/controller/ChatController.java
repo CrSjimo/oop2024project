@@ -1,6 +1,7 @@
 package dev.sjimo.oop2024project.controller;
 
 import dev.sjimo.oop2024project.payload.*;
+import dev.sjimo.oop2024project.repository.UserRepository;
 import dev.sjimo.oop2024project.service.ChatService;
 import dev.sjimo.oop2024project.service.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,8 @@ public class ChatController {
 
     @Autowired
     private JwtService jwtService;
+    @Autowired
+    private UserRepository userRepository;
 
     @PutMapping("/group")
     public ChatResponse createGroup(@RequestHeader("Authorization") String jwtToken, @RequestBody CreateGroupRequest createGroupRequest) {
@@ -25,14 +28,14 @@ public class ChatController {
 
     @GetMapping("/group/{groupId}")
     public ChatResponse getGroupInfo(@RequestHeader("Authorization") String jwtToken, @PathVariable Long groupId) {
-        //TODO 获取群信息
-        return null;
+        Long memberId = jwtService.extractUserId(jwtToken.replace("Bearer ", ""));
+        return chatService.getGroupChat(memberId, groupId);
     }
 
     @GetMapping("/group/{groupId}/users")
-    public Object/* TODO */ getGroupUsers(@RequestHeader("Authorization") String jwtToken, @PathVariable Long groupId) {
-        //TODO 获取群成员列表
-        return null;
+    public Object getGroupUsers(@RequestHeader("Authorization") String jwtToken, @PathVariable Long groupId) {
+        Long memberId = jwtService.extractUserId(jwtToken.replace("Bearer ", ""));
+        return chatService.getChatMember(memberId, groupId);
     }
 
 

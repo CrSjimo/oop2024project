@@ -30,11 +30,6 @@ public class AuthController {
         userService.registerUser(request.getEmail(), request.getPassword());
     }
 
-    @PostMapping("/resendVerificationEmail")
-    public void resendVerificationEmail(@RequestBody ResendVerificationEmailRequest request) {
-        userService.resendVerificationEmail(request.getEmail());
-    }
-
     @PostMapping("/verify")
     public void verifyToken(@RequestBody VerificationRequest request) {
         verificationService.verifyForRegistration(request.getToken());
@@ -61,4 +56,16 @@ public class AuthController {
             userService.resetPassword(userId, request.getNewPassword());
         }
     }
+
+    @PostMapping("/resetEmail")
+    public void resetEmail(@RequestHeader(value = "Authorization", required = false) String jwtToken, @RequestBody ResetEmailRequest request) {
+        if (jwtToken != null) {
+            Long userId = jwtService.extractUserId(jwtToken.replace("Bearer ", ""));
+            userService.resetEmail(request.getNewEmail(), userId);
+        }else {
+            var userId = verificationService.verifyForResetPassword(request.getToken());
+            userService.resetEmail(request.getNewEmail(), userId);
+        }
+    }
+
 }
