@@ -441,4 +441,18 @@ public class ChatService {
             return new ChatMemberResponse(chatMember.getId(),chat.getName(),chatMember.getMemberType(),chat.getCreatedDate(),chatMember.getUser().getId(),userData.getUsername());
         }).toList();
     }
+
+    /**
+     * 获取自己所在的所有聊天
+     */
+    public List<ChatResponse> getAllChat(Long userId){
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
+        if (!user.isVerified())
+            throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
+        var chatMembers = chatMemberRepository.findAllByUser_Id(userId);
+        return chatMembers.stream().map(chatMember -> {
+            Chat chat = chatMember.getChat();
+            return new ChatResponse(chat.getId(),chat.getName(),chat.getType(),chat.getUser1().get().getId(), chat.getUser2().get().getId(),chat.getCreatedDate());
+        }).toList();
+    }
 }
