@@ -58,14 +58,10 @@ public class AuthController {
     }
 
     @PostMapping("/resetEmail")
-    public void resetEmail(@RequestHeader(value = "Authorization", required = false) String jwtToken, @RequestBody ResetEmailRequest request) {
-        if (jwtToken != null) {
-            Long userId = jwtService.extractUserId(jwtToken.replace("Bearer ", ""));
-            userService.resetEmail(request.getNewEmail(), userId);
-        }else {
-            var userId = verificationService.verifyForResetPassword(request.getToken());
-            userService.resetEmail(request.getNewEmail(), userId);
-        }
+    public void resetEmail(@RequestHeader(value = "Authorization") String jwtToken, @RequestBody ResetEmailRequest request) {
+        Long userId = jwtService.extractUserId(jwtToken.replace("Bearer ", ""));
+        userService.resetEmail(request.getNewEmail(), userId);
+
     }
 
 }

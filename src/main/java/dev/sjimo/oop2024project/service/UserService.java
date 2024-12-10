@@ -34,28 +34,22 @@ public class UserService {
     private MailService mailService;
 
     public void registerUser(String email, String password) {
-        if (userRepository.existsByEmail(email)) {
-            var user = userRepository.findByEmail(email).orElseThrow(()-> new ResponseException(ErrorCode.USER_NOT_EXIST));
-            if (!user.isVerified()){
-                user.setPassword(password);
-                user.setVerified(false);
-                userRepository.save(user);
-                var token = verificationService.regenerateVerificationToken(user.getId());
-                mailService.sendVerificationEmail(email, token);
-            }else
-            {
+        var userOpt = userRepository.findByEmail(email);
+        User user;
+        if (userOpt.isPresent()) {
+            user = userOpt.get();
+            if (user.isVerified()){
                 throw new ResponseException(ErrorCode.USER_ALREADY_VERIFIED);
             }
         } else {
-            User user = new User();
+            user = new User();
             user.setEmail(email);
-            user.setPassword(password); // 需加密保存
             user.setVerified(false);
-            userRepository.save(user);
-
-            String token = verificationService.generateVerificationToken(user.getId());
-            mailService.sendVerificationEmail(email, token);
         }
+        user.setPassword(password);
+        userRepository.save(user);
+        var token = verificationService.generateVerificationToken(user.getId());
+        mailService.sendVerificationEmail(email, token);
     }
 
     public String loginUser(String email, String password) {
@@ -103,10 +97,6 @@ public class UserService {
         var user = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
         if (!user.isVerified()) {
             throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
-        }
-        var userDataOpt = userDataRepository.findByUser_Id(userId);
-        if (userDataOpt.isEmpty()) {
-            var userData = new UserData();
         }
         user.setEmail(email);
         userRepository.save(user);
