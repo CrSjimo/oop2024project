@@ -8,12 +8,14 @@ public class UserDataResponse {
     private UserData.Gender gender;
     private String gravatarEmail;
     private String description;
+    private String email;
 
-    public UserDataResponse(String username, UserData.Gender gender, String gravatarEmail, String description) {
+    public UserDataResponse(String username, UserData.Gender gender, String gravatarEmail, String description, String email) {
         this.username = username;
         this.gender = gender;
         this.gravatarEmail = gravatarEmail;
         this.description = description;
+        this.email = email;
     }
 
     public String getUsername() {
@@ -30,5 +32,9 @@ public class UserDataResponse {
 
     public String getDescription() {
         return description;
+    }
+
+    public String getEmail() {
+        return email;
     }
 }
