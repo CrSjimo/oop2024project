@@ -4,6 +4,7 @@ import dev.sjimo.oop2024project.model.Message;
 import dev.sjimo.oop2024project.payload.MessageResponse;
 import dev.sjimo.oop2024project.service.JwtService;
 import dev.sjimo.oop2024project.service.MessageService;
+import dev.sjimo.oop2024project.service.PushService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,11 +17,15 @@ public class MessageController {
     @Autowired
     private JwtService jwtService;
 
+    PushService pushService = new PushService();
+
     @PostMapping("/send")
     public void sendMessage(@RequestHeader("Authorization") String jwtToken,@RequestParam Long userId,@RequestParam Long chatId, @RequestParam String content) {
         Long userId1 = jwtService.extractUserId(jwtToken.replace("Bearer ", ""));
         if (userId1 == userId) {
             messageService.sendMessage(userId,chatId,content);
+            pushService.pushTo(userId,"Send success");
+
         }
 
     }
@@ -29,6 +34,7 @@ public class MessageController {
         Long userId1 = jwtService.extractUserId(jwtToken.replace("Bearer ", ""));
         if (userId1 == userId) {
             messageService.revokeMessage(userId, messageId);
+            pushService.pushTo(userId,"Revoke success");
         }
     }
 

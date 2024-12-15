@@ -1,5 +1,6 @@
 package dev.sjimo.oop2024project.controller;
 
+import dev.sjimo.oop2024project.payload.BlockListResponse;
 import dev.sjimo.oop2024project.payload.FriendCandidateResponse;
 import dev.sjimo.oop2024project.payload.FriendApplicationRequest;
 import dev.sjimo.oop2024project.payload.FriendResponse;
@@ -8,7 +9,6 @@ import dev.sjimo.oop2024project.service.JwtService;
 import dev.sjimo.oop2024project.utils.ErrorCode;
 import dev.sjimo.oop2024project.utils.ResponseException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -100,6 +100,20 @@ public class ContactController {
         contactService.deleteBlock(user1Id, user2Id);
     }
 
+    /**
+     * 列出所有userId的黑名单
+     * @param jwtToken
+     * @param user1Id
+     * @return
+     */
+    @PostMapping("/{user1Id}/blocklist")
+    public List<BlockListResponse> getBlockList(@RequestHeader("Authorization") String jwtToken, @PathVariable("user1Id") Long user1Id) {
+        Long userId = jwtService.extractUserId(jwtToken.replace("Bearer ", ""));
+        if (!user1Id.equals(userId)) {
+            throw new ResponseException(ErrorCode.PERMISSION_DENIED);
+        }
+        return contactService.getBlockList(user1Id);
+    }
     /**
      * 列出所有收到的好友申请
      * @param jwtToken
