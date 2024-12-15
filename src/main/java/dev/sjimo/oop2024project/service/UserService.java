@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.NoSuchElementException;
+import java.util.UUID;
 
 @Service
 public class UserService {
@@ -100,5 +101,10 @@ public class UserService {
         }
         user.setEmail(email);
         userRepository.save(user);
+    }
+
+    public void verifyEmail(Long userId, String token) {
+        String verifyCode = UUID.randomUUID().toString().substring(0, 6);
+
     }
 }

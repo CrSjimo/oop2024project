@@ -4,6 +4,7 @@ import dev.sjimo.oop2024project.model.BlockList;
 import dev.sjimo.oop2024project.model.Friend;
 import dev.sjimo.oop2024project.model.FriendCandidate;
 import dev.sjimo.oop2024project.model.User;
+import dev.sjimo.oop2024project.payload.BlockListResponse;
 import dev.sjimo.oop2024project.payload.FriendCandidateResponse;
 import dev.sjimo.oop2024project.payload.FriendResponse;
 import dev.sjimo.oop2024project.repository.BlockListRepository;
@@ -162,6 +163,25 @@ public class ContactService {
         blockListRepository.delete(blockEntry.get());
     }
 
+    /**
+     * 返回拉黑列表
+     * @param userId
+     * @return blockList
+     */
+    public List<BlockListResponse> getBlockList(Long userId){
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
+        if (!user.isVerified()) {
+            throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
+        }
+        var blockLists = blockListRepository.findAllByUser1_IdOrderByCreatedDate(userId);
+        return blockLists.stream().map(blockList -> {
+            BlockListResponse blockListResponse = new BlockListResponse(blockList.getId(),
+                    blockList.getUser1().getId(),
+                    blockList.getUser2().getId(),
+                    blockList.getCreatedDate());
+            return blockListResponse;
+        }).toList();
+    }
     /**
      * 接受好友申请
      *
