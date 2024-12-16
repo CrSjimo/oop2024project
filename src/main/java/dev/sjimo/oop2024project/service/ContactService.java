@@ -176,7 +176,6 @@ public class ContactService {
         var blockLists = blockListRepository.findAllByUser1_IdOrderByCreatedDate(userId);
         return blockLists.stream().map(blockList -> {
             BlockListResponse blockListResponse = new BlockListResponse(blockList.getId(),
-                    blockList.getUser1().getId(),
                     blockList.getUser2().getId(),
                     blockList.getCreatedDate());
             return blockListResponse;
