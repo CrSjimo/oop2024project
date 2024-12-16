@@ -157,7 +157,7 @@ public class ContactService {
             throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
         }
         var blockEntry = blockListRepository.findByUser1_IdAndUser2_Id(userId, blockId);
-        if (!blockEntry.isPresent()) {
+        if (blockEntry.isEmpty()) {
             throw new ResponseException(ErrorCode.NOT_BLOCKED);
         }
         blockListRepository.delete(blockEntry.get());
@@ -165,7 +165,7 @@ public class ContactService {
 
     /**
      * 返回拉黑列表
-     * @param userId
+     * @param userId 发出请求的用户id
      * @return blockList
      */
     public List<BlockListResponse> getBlockList(Long userId){
@@ -175,11 +175,12 @@ public class ContactService {
         }
         var blockLists = blockListRepository.findAllByUser1_IdOrderByCreatedDate(userId);
         return blockLists.stream().map(blockList -> {
-            BlockListResponse blockListResponse = new BlockListResponse(blockList.getId(),
+            return  new BlockListResponse(blockList.getId(),
                     blockList.getUser1().getId(),
                     blockList.getUser2().getId(),
+                    blockList.getCommentName2(),
+                    blockList.getUser2().getEmail(),
                     blockList.getCreatedDate());
-            return blockListResponse;
         }).toList();
     }
     /**
@@ -221,7 +222,7 @@ public class ContactService {
      * 获取自己发给别人的好友申请
      *
      * @param userId 自己的userId
-     * @return
+     * @return List<FriendCandidateResponse>
      */
     public List<FriendCandidateResponse> getSelfFriendCandidates(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
@@ -244,7 +245,7 @@ public class ContactService {
      * 获取别人发给自己的好友申请
      *
      * @param userId 自己的userId
-     * @return
+     * @return List<FriendCandidateResponse>
      */
     public List<FriendCandidateResponse> getOtherFriendCandidates(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));

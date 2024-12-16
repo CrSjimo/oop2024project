@@ -18,6 +18,8 @@ public class BlockList {
     private User user2;
     private LocalDateTime createdDate;
 
+    private String commentName2;//user1给user2的备注名
+
     public Long getId() {
         return id;
     }
@@ -41,4 +43,8 @@ public class BlockList {
     public LocalDateTime getCreatedDate() {
         return createdDate;
     }
+
+    public void setCommentName2(String commentName2){ this.commentName2 = commentName2; }
+
+    public String getCommentName2(){ return commentName2; }
 }
