@@ -75,7 +75,7 @@ public class ContactService {
             throw new ResponseException(ErrorCode.FRIEND_APPLICATION_PENDING);
         }
 
-        var friendCandidate = friendCandidateRepository.findByUser1_IdAndUser2_IdAndStatus(userId, friendId, FriendCandidate.Status.PENDING);
+        var friendCandidate = friendCandidateRepository.findByUser1_IdAndUser2_IdAndStatus(friendId, userId, FriendCandidate.Status.PENDING);
         if (friendCandidate.isPresent()) {
             friendCandidate.get().setStatus(FriendCandidate.Status.ACCEPTED);
             friendCandidateRepository.save(friendCandidate.get());
@@ -157,7 +157,7 @@ public class ContactService {
             throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
         }
         var blockEntry = blockListRepository.findByUser1_IdAndUser2_Id(userId, blockId);
-        if (blockEntry.isEmpty()) {
+        if (!blockEntry.isPresent()) {
             throw new ResponseException(ErrorCode.NOT_BLOCKED);
         }
         blockListRepository.delete(blockEntry.get());
@@ -165,11 +165,7 @@ public class ContactService {
 
     /**
      * 返回拉黑列表
-<<<<<<< HEAD
-     * @param userId 发出请求的用户id
-=======
      * @param userId
->>>>>>> dcdb526706432699391f4459918feb94e17327b3
      * @return blockList
      */
     public List<BlockListResponse> getBlockList(Long userId){
@@ -179,20 +175,11 @@ public class ContactService {
         }
         var blockLists = blockListRepository.findAllByUser1_IdOrderByCreatedDate(userId);
         return blockLists.stream().map(blockList -> {
-<<<<<<< HEAD
-            return  new BlockListResponse(blockList.getId(),
-                    blockList.getUser1().getId(),
-                    blockList.getUser2().getId(),
-                    blockList.getCommentName2(),
-                    blockList.getUser2().getEmail(),
-                    blockList.getCreatedDate());
-=======
             BlockListResponse blockListResponse = new BlockListResponse(blockList.getId(),
                     blockList.getUser1().getId(),
                     blockList.getUser2().getId(),
                     blockList.getCreatedDate());
             return blockListResponse;
->>>>>>> dcdb526706432699391f4459918feb94e17327b3
         }).toList();
     }
     /**
@@ -234,7 +221,7 @@ public class ContactService {
      * 获取自己发给别人的好友申请
      *
      * @param userId 自己的userId
-     * @return List<FriendCandidateResponse>
+     * @return
      */
     public List<FriendCandidateResponse> getSelfFriendCandidates(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
@@ -257,7 +244,7 @@ public class ContactService {
      * 获取别人发给自己的好友申请
      *
      * @param userId 自己的userId
-     * @return List<FriendCandidateResponse>
+     * @return
      */
     public List<FriendCandidateResponse> getOtherFriendCandidates(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));

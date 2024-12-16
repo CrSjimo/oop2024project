@@ -7,6 +7,7 @@ import dev.sjimo.oop2024project.repository.VerificationTokenRepository;
 import dev.sjimo.oop2024project.utils.ErrorCode;
 import dev.sjimo.oop2024project.utils.ResponseException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -21,6 +22,9 @@ public class VerificationService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Value("${oop2024project.debug}")
+    private boolean debug;
 
     public String generateVerificationToken(Long userId) {
         var token = tokenRepository.findByUser_Id(userId).orElse(new VerificationToken());
