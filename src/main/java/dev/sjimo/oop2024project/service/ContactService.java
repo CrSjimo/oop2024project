@@ -75,7 +75,7 @@ public class ContactService {
             throw new ResponseException(ErrorCode.FRIEND_APPLICATION_PENDING);
         }
 
-        var friendCandidate = friendCandidateRepository.findByUser1_IdAndUser2_IdAndStatus(userId, friendId, FriendCandidate.Status.PENDING);
+        var friendCandidate = friendCandidateRepository.findByUser1_IdAndUser2_IdAndStatus(friendId, userId, FriendCandidate.Status.PENDING);
         if (friendCandidate.isPresent()) {
             friendCandidate.get().setStatus(FriendCandidate.Status.ACCEPTED);
             friendCandidateRepository.save(friendCandidate.get());

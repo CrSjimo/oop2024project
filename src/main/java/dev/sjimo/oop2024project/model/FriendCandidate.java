@@ -2,6 +2,7 @@ package dev.sjimo.oop2024project.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -17,7 +18,10 @@ public class FriendCandidate {
     @ManyToOne
     @JoinColumn(name = "user2_id",nullable = false)
     private User user2;         //接到申请的用户
+
+    @CreationTimestamp
     private LocalDateTime createdDate;
+
     private String message;
     @Enumerated(EnumType.ORDINAL)
     private Status status;
