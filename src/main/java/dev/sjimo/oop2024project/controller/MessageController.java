@@ -5,11 +5,8 @@ import dev.sjimo.oop2024project.payload.MessageResponse;
 import dev.sjimo.oop2024project.service.JwtService;
 import dev.sjimo.oop2024project.service.MessageService;
 import dev.sjimo.oop2024project.service.PushService;
-<<<<<<< HEAD
 import dev.sjimo.oop2024project.utils.ErrorCode;
 import dev.sjimo.oop2024project.utils.ResponseException;
-=======
->>>>>>> dcdb526706432699391f4459918feb94e17327b3
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,20 +20,8 @@ public class MessageController {
     private JwtService jwtService;
 
     PushService pushService = new PushService();
-<<<<<<< HEAD
-=======
 
-    @PostMapping("/send")
-    public void sendMessage(@RequestHeader("Authorization") String jwtToken,@RequestParam Long userId,@RequestParam Long chatId, @RequestParam String content) {
-        Long userId1 = jwtService.extractUserId(jwtToken.replace("Bearer ", ""));
-        if (userId1 == userId) {
-            messageService.sendMessage(userId,chatId,content);
-            pushService.pushTo(userId,"Send success");
-
-        }
->>>>>>> dcdb526706432699391f4459918feb94e17327b3
-
-    @PostMapping("/send")
+    @PostMapping( "/send")
     public void sendMessage(@RequestHeader("Authorization") String jwtToken,@RequestParam Long user1Id,@RequestParam Long chatId, @RequestParam String content) {
         Long userId = jwtService.extractUserId(jwtToken.replace("Bearer ", ""));
         if (!user1Id.equals(userId)) {
@@ -46,18 +31,11 @@ public class MessageController {
         pushService.pushTo(userId,"Send success");
     }
     @DeleteMapping("/deleteMessage/{messageId}")
-<<<<<<< HEAD
-    public void revokeMessage(@RequestHeader("Authorization") String jwtToken,@RequestParam Long user1Id, @RequestParam Long chatId, @PathVariable Long messageId) {
-        Long userId = jwtService.extractUserId(jwtToken.replace("Bearer ", ""));
-        if (!user1Id.equals(userId)) {
-            throw new ResponseException(ErrorCode.PERMISSION_DENIED);
-=======
+
     public void revokeMessage(@RequestHeader("Authorization") String jwtToken,@RequestParam Long userId, @RequestParam Long chatId, @PathVariable Long messageId) {
         Long userId1 = jwtService.extractUserId(jwtToken.replace("Bearer ", ""));
-        if (userId1 == userId) {
-            messageService.revokeMessage(userId, messageId);
-            pushService.pushTo(userId,"Revoke success");
->>>>>>> dcdb526706432699391f4459918feb94e17327b3
+        if (!userId1.equals(userId)) {
+            throw new ResponseException(ErrorCode.PERMISSION_DENIED);
         }
         messageService.revokeMessage(userId, messageId);
         pushService.pushTo(userId,"Revoke success");
