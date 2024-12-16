@@ -165,7 +165,11 @@ public class ContactService {
 
     /**
      * 返回拉黑列表
+<<<<<<< HEAD
      * @param userId 发出请求的用户id
+=======
+     * @param userId
+>>>>>>> dcdb526706432699391f4459918feb94e17327b3
      * @return blockList
      */
     public List<BlockListResponse> getBlockList(Long userId){
@@ -175,12 +179,20 @@ public class ContactService {
         }
         var blockLists = blockListRepository.findAllByUser1_IdOrderByCreatedDate(userId);
         return blockLists.stream().map(blockList -> {
+<<<<<<< HEAD
             return  new BlockListResponse(blockList.getId(),
                     blockList.getUser1().getId(),
                     blockList.getUser2().getId(),
                     blockList.getCommentName2(),
                     blockList.getUser2().getEmail(),
                     blockList.getCreatedDate());
+=======
+            BlockListResponse blockListResponse = new BlockListResponse(blockList.getId(),
+                    blockList.getUser1().getId(),
+                    blockList.getUser2().getId(),
+                    blockList.getCreatedDate());
+            return blockListResponse;
+>>>>>>> dcdb526706432699391f4459918feb94e17327b3
         }).toList();
     }
     /**

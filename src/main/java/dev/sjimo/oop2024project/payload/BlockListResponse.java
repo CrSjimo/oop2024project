@@ -9,6 +9,7 @@ public class BlockListResponse {
     private Long id;
     private Long user1_Id;
     private Long user2_Id;
+<<<<<<< HEAD
     private String commentName;
     private String email;
     private LocalDateTime createdDate;
@@ -19,6 +20,14 @@ public class BlockListResponse {
         this.user2_Id = user2_Id;
         this.commentName = commentName;
         this.email = email;
+=======
+    private LocalDateTime createdDate;
+
+    public BlockListResponse(Long id, Long user1_Id, Long user2_Id, LocalDateTime createdDate){
+        this.id = id;
+        this.user1_Id = user1_Id;
+        this.user2_Id = user2_Id;
+>>>>>>> dcdb526706432699391f4459918feb94e17327b3
         this.createdDate = createdDate;
     }
     public Long getId() {
@@ -33,10 +42,13 @@ public class BlockListResponse {
         return user2_Id;
     }
 
+<<<<<<< HEAD
     public String getCommentName(){ return commentName; }
 
     public String getEmail(){ return email; }
 
+=======
+>>>>>>> dcdb526706432699391f4459918feb94e17327b3
     public LocalDateTime getCreatedDate() {
         return createdDate;
     }
