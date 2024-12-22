@@ -106,7 +106,7 @@ public class ContactController {
      * @param user1Id
      * @return
      */
-    @PostMapping("/{user1Id}/blocklist")
+    @GetMapping("/{user1Id}/blocklist")
     public List<BlockListResponse> getBlockList(@RequestHeader("Authorization") String jwtToken, @PathVariable("user1Id") Long user1Id) {
         Long userId = jwtService.extractUserId(jwtToken.replace("Bearer ", ""));
         if (!user1Id.equals(userId)) {
@@ -120,7 +120,7 @@ public class ContactController {
      * @param user1Id
      * @return
      */
-    @GetMapping("/{user1Id}/friend_candidate/")
+    @GetMapping("/{user1Id}/friend_candidate")
     public List<FriendCandidateResponse> getFriendCandidates(@RequestHeader("Authorization") String jwtToken, @PathVariable("user1Id") Long user1Id) {
         Long userId = jwtService.extractUserId(jwtToken.replace("Bearer ", ""));
         if (!user1Id.equals(userId)) {

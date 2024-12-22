@@ -7,20 +7,20 @@ import java.time.LocalDateTime;
 
 public class BlockListResponse {
     private Long id;
-    private Long user2_Id;
+    private Long userId;
     private LocalDateTime createdDate;
 
-    public BlockListResponse(Long id, Long user2_Id, LocalDateTime createdDate){
+    public BlockListResponse(Long id, Long userId, LocalDateTime createdDate) {
         this.id = id;
-        this.user2_Id = user2_Id;
+        this.userId = userId;
         this.createdDate = createdDate;
     }
     public Long getId() {
         return id;
     }
 
-    public Long getUser2() {
-        return user2_Id;
+    public Long getUserId() {
+        return userId;
     }
 
     public LocalDateTime getCreatedDate() {

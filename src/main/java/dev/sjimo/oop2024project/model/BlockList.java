@@ -1,6 +1,7 @@
 package dev.sjimo.oop2024project.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -16,10 +17,8 @@ public class BlockList {
     @ManyToOne
     @JoinColumn(name = "user2_id",nullable = false)
     private User user2;
+    @CreationTimestamp
     private LocalDateTime createdDate;
-
-    private String commentName2;//user1给user2的备注名
-
     public Long getId() {
         return id;
     }
@@ -43,8 +42,4 @@ public class BlockList {
     public LocalDateTime getCreatedDate() {
         return createdDate;
     }
-
-    public void setCommentName2(String commentName2){ this.commentName2 = commentName2; }
-
-    public String getCommentName2(){ return commentName2; }
 }
