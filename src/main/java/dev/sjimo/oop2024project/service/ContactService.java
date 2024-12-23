@@ -194,6 +194,10 @@ public class ContactService {
         if (friendCandidate.getStatus() != FriendCandidate.Status.PENDING) {
             throw new ResponseException(ErrorCode.FRIEND_APPLICATION_SOLVED);
         }
+        var friend = friendRepository.findById(friendCandidateId);
+        if (friend.isPresent()) {
+            throw new ResponseException(ErrorCode.FRIEND_ALREADY_EXISTS);
+        }
         friendCandidate.setStatus(FriendCandidate.Status.ACCEPTED);
         friendCandidateRepository.save(friendCandidate);
         beFriend(friendCandidate.getUser1(), friendCandidate.getUser2());

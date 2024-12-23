@@ -30,7 +30,8 @@ public enum ErrorCode {
     MESSAGE_ALREADY_EXIST(HttpStatus.CONFLICT,123,"Message already exist"),
     MESSAGE_NOT_EXIST(HttpStatus.CONFLICT,124,"Message not exist"),
     MESSAGE_TOO_OLD(HttpStatus.CONFLICT,125,"Message too old"),
-    USER_NOT_IN_GROUP(HttpStatus.CONFLICT,126,"User not in group"),;
+    USER_NOT_IN_GROUP(HttpStatus.CONFLICT,126,"User not in group"),
+    FRIEND_ALREADY_EXISTS(HttpStatus.CONFLICT,127,"Friend already exists");
 
     private final HttpStatus status;
     private final int code;
