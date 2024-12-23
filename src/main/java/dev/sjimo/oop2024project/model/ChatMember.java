@@ -2,6 +2,7 @@ package dev.sjimo.oop2024project.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -28,7 +29,7 @@ public class ChatMember {
     @ManyToOne
     @JoinColumn(name = "chat_id", nullable = false)
     private Chat chat;
-
+    @CreationTimestamp
     private LocalDateTime createdDate;
 
     public Long getId() {

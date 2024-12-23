@@ -2,6 +2,7 @@ package dev.sjimo.oop2024project.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -24,6 +25,7 @@ public class ChatToMemberCandidate {
     private User issuer;            //邀请的群管理员
 
     private String message;
+    @CreationTimestamp
     private LocalDateTime createdDate;
 
     @Enumerated(EnumType.ORDINAL)

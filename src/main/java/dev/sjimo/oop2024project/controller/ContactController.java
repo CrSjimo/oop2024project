@@ -1,9 +1,6 @@
 package dev.sjimo.oop2024project.controller;
 
-import dev.sjimo.oop2024project.payload.BlockListResponse;
-import dev.sjimo.oop2024project.payload.FriendCandidateResponse;
-import dev.sjimo.oop2024project.payload.FriendApplicationRequest;
-import dev.sjimo.oop2024project.payload.FriendResponse;
+import dev.sjimo.oop2024project.payload.*;
 import dev.sjimo.oop2024project.service.ContactService;
 import dev.sjimo.oop2024project.service.JwtService;
 import dev.sjimo.oop2024project.utils.ErrorCode;
@@ -30,13 +27,14 @@ public class ContactController {
      * @param user2Id
      */
     @PostMapping("/{user1Id}/friend/{user2Id}")
-    public void updateFriend(@RequestHeader("Authorization") String jwtToken, @PathVariable("user1Id") Long user1Id, @PathVariable("user2Id") Long user2Id) {
+    public void updateFriend(@RequestHeader("Authorization") String jwtToken, @PathVariable("user1Id") Long user1Id, @PathVariable("user2Id") Long user2Id, @RequestBody UpdateFriendRequest updateFriendRequest) {
         Long userId = jwtService.extractUserId(jwtToken.replace("Bearer ", ""));
         if (!user1Id.equals(userId)) {
             throw new ResponseException(ErrorCode.PERMISSION_DENIED);
         }
 
         //TODO 更新备注名等信息
+        contactService.updateFriendData(user1Id,user2Id,updateFriendRequest.getCommentName());
 
     }
 

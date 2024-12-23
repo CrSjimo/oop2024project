@@ -1,6 +1,7 @@
 package dev.sjimo.oop2024project.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -16,6 +17,7 @@ public class Friend {
     @ManyToOne
     @JoinColumn(name = "user2_id",nullable = false)
     private User user2;
+    @CreationTimestamp
     private LocalDateTime createdDate;
 
     private String commentName1;//user2给user1的备注名

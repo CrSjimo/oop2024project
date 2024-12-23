@@ -195,11 +195,12 @@ public class ContactService {
             throw new ResponseException(ErrorCode.FRIEND_APPLICATION_SOLVED);
         }
         var friend = friendRepository.findById(friendCandidateId);
-        if (friend.isPresent()) {
-            throw new ResponseException(ErrorCode.FRIEND_ALREADY_EXISTS);
-        }
+
         friendCandidate.setStatus(FriendCandidate.Status.ACCEPTED);
         friendCandidateRepository.save(friendCandidate);
+        if (friend.isPresent()) {
+            return;
+        }
         beFriend(friendCandidate.getUser1(), friendCandidate.getUser2());
     }
 
@@ -264,5 +265,20 @@ public class ContactService {
             friendCandidateResponse.setMessage(friendCandidate.getMessage());
             return friendCandidateResponse;
         }).toList();
+    }
+
+    public void updateFriendData(Long userId,Long friendId, String name){
+        User user1 = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
+        var user2 = userRepository.findById(friendId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
+        if (!user1.isVerified() || !user2.isVerified()) {
+            throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
+        }
+        var friend = friendRepository.findByUser1AndUser2(user1, user2).orElseThrow(() -> new ResponseException(ErrorCode.NOT_BE_FRIEND));
+        if (friend.getUser1().getId().equals(user1.getId())) {
+            friend.setCommentName2(name);
+        } else {
+            friend.setCommentName1(name);
+        }
+        friendRepository.save(friend);
     }
 }

@@ -2,6 +2,7 @@ package dev.sjimo.oop2024project.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -18,6 +19,7 @@ public class Chat {
     private Long id;
 
     private String name;
+    @CreationTimestamp
     private LocalDateTime createdDate;
 
     @Enumerated(EnumType.ORDINAL)
