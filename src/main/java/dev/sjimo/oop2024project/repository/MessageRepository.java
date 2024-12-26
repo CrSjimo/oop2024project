@@ -1,5 +1,7 @@
 package dev.sjimo.oop2024project.repository;
 
+import dev.sjimo.oop2024project.model.ChatMember;
+import dev.sjimo.oop2024project.model.FriendCandidate;
 import dev.sjimo.oop2024project.model.Message;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -29,5 +31,5 @@ public interface MessageRepository extends JpaRepository<Message,Long> {
             @Param("messageId") Long messageId,
             Pageable pageable
     );
-
+    List<Message> findAllByUser_IdAndChat_Id(Long user_Id, Long chat_Id);
 }

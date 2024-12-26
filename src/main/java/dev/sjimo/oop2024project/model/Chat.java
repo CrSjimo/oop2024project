@@ -26,11 +26,11 @@ public class Chat {
     private Type type;
 
     @ManyToOne
-    @JoinColumn(name = "user1_id", nullable = false)
+    @JoinColumn(name = "user1_id", nullable = true)
     private User user1;
 
     @ManyToOne
-    @JoinColumn(name = "user2_id", nullable = false)
+    @JoinColumn(name = "user2_id", nullable = true)
     private User user2;
 
     public Long getId() {

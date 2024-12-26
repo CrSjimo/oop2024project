@@ -452,7 +452,12 @@ public class ChatService {
         var chatMembers = chatMemberRepository.findAllByUser_Id(userId);
         return chatMembers.stream().map(chatMember -> {
             Chat chat = chatMember.getChat();
-            return new ChatResponse(chat.getId(),chat.getName(),chat.getType(),chat.getUser1().get().getId(), chat.getUser2().get().getId(),chat.getCreatedDate());
+            return new ChatResponse(chat.getId(),
+                    chat.getName(),
+                    chat.getType(),
+                    chat.getUser1().isPresent() ? chat.getUser1().get().getId() : null,
+                    chat.getUser2().isPresent() ? chat.getUser2().get().getId() : null,
+                    chat.getCreatedDate());
         }).toList();
     }
 }

@@ -4,6 +4,8 @@ import dev.sjimo.oop2024project.model.Chat;
 import dev.sjimo.oop2024project.model.ChatMember;
 import dev.sjimo.oop2024project.model.User;
 import dev.sjimo.oop2024project.model.Message;
+import dev.sjimo.oop2024project.payload.FriendCandidateResponse;
+import dev.sjimo.oop2024project.payload.MessageRequest;
 import dev.sjimo.oop2024project.payload.MessageResponse;
 import dev.sjimo.oop2024project.repository.ChatMemberRepository;
 import dev.sjimo.oop2024project.repository.ChatRepository;
@@ -40,9 +42,9 @@ public class MessageService {
      *
      * @param userId
      * @param chatId
-     * @param message
+     * @param messageRequest
      */
-    public Message sendMessage(Long userId, Long chatId, String message) {
+    public void sendMessage(Long userId, Long chatId, MessageRequest messageRequest) {
         User user = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
         if (!user.isVerified())
             throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
@@ -56,8 +58,8 @@ public class MessageService {
         messageEntity.setChat(chat);
         messageEntity.setStatus(Message.Status.UNREAD);
         messageEntity.setUser(user);
-        messageEntity.setMessage(message);
-        return messageRepository.save(messageEntity);
+        messageEntity.setMessage(messageRequest.getMessage());
+        messageRepository.save(messageEntity);
     }
 
     /**
@@ -147,9 +149,8 @@ public class MessageService {
      *
      * @param userId
      * @param chatId
-     * @param messageId
      */
-    public MessageResponse getMessage(Long userId, Long chatId, Long messageId) {
+    public List<MessageResponse> getMessage(Long userId, Long chatId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
         if (!user.isVerified())
             throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
@@ -157,14 +158,19 @@ public class MessageService {
         Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new ResponseException(ErrorCode.CHAT_NOT_EXIST));
 
         ChatMember chatMember = chatMemberRepository.findByUser_IdAndChat_Id(userId, chatId).orElseThrow(() -> new ResponseException(ErrorCode.PERMISSION_DENIED));
-        Message message = messageRepository.findById(messageId).orElseThrow(() -> new ResponseException(ErrorCode.MESSAGE_NOT_EXIST));
-
-        if (!message.getChat().equals(chat)) {
-            throw new ResponseException(ErrorCode.PERMISSION_DENIED);
-        }
-        return new MessageResponse(messageId, message.getMessage(), message.getUser(), chat, message.getCreatedDate(), message.getStatus());
+        var allMessages = messageRepository.findAllByUser_IdAndChat_Id(userId, chatId);
+        return allMessages.stream().map(message -> {
+            MessageResponse messageResponse = new MessageResponse(
+                    message.getId(),
+                    message.getMessage(),
+                    message.getUser(),
+                    message.getChat(),
+                    message.getCreatedDate(),
+                    message.getStatus()
+            );
+            return messageResponse;
+        }).toList();
     }
-
     /**
      * 获取最近的消息
      */

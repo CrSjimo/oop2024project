@@ -4,12 +4,15 @@ import dev.sjimo.oop2024project.payload.*;
 import dev.sjimo.oop2024project.repository.UserRepository;
 import dev.sjimo.oop2024project.service.ChatService;
 import dev.sjimo.oop2024project.service.JwtService;
+import dev.sjimo.oop2024project.utils.ErrorCode;
+import dev.sjimo.oop2024project.utils.ResponseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController("/api/chat")
+@RestController
+@RequestMapping("/api/chat")
 public class ChatController {
 
     @Autowired
@@ -26,6 +29,15 @@ public class ChatController {
         return chatService.createGroup(ownerId, createGroupRequest.getGroupName());
     }
 
+    @PutMapping("/getPrivateChat/{user1Id}/{user2Id}")
+    public ChatResponse getPrivateChat(@RequestHeader("Authorization") String jwtToken, @PathVariable Long user1Id, @PathVariable Long user2Id){
+        Long ownerId = jwtService.extractUserId(jwtToken.replace("Bearer",""));
+        if (!user1Id.equals(ownerId)){
+            throw new ResponseException(ErrorCode.PERMISSION_DENIED);
+        }
+        return chatService.getPrivateChat(user1Id,user1Id);
+    }
+
     @GetMapping("/group/{groupId}")
     public ChatResponse getGroupInfo(@RequestHeader("Authorization") String jwtToken, @PathVariable Long groupId) {
         Long memberId = jwtService.extractUserId(jwtToken.replace("Bearer ", ""));
@@ -37,8 +49,6 @@ public class ChatController {
         Long memberId = jwtService.extractUserId(jwtToken.replace("Bearer ", ""));
         return chatService.getChatMember(memberId, groupId);
     }
-
-
 
     @PostMapping("/group/{groupId}/invite/{userId}")
     public void sendInvitation(@RequestHeader("Authorization") String jwtToken, @PathVariable Long groupId, @PathVariable Long userId, @RequestBody GroupInvitationRequest groupInvitationRequest) {
@@ -102,5 +112,9 @@ public class ChatController {
         chatService.rejectChatApplication(userId, memberToChatCandidateId);
     }
 
-
+    @GetMapping("/getAllGroupSelfIn")
+    public List<ChatResponse> getAllGroupSelfIn(@RequestHeader("Authorization") String jwtToken) {
+        Long userId = jwtService.extractUserId(jwtToken.replace("Bearer ", ""));
+        return chatService.getAllChat(userId);
+    }
 }
