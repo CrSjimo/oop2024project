@@ -4,7 +4,6 @@ import dev.sjimo.oop2024project.model.Chat;
 import dev.sjimo.oop2024project.model.ChatMember;
 import dev.sjimo.oop2024project.model.User;
 import dev.sjimo.oop2024project.model.Message;
-import dev.sjimo.oop2024project.payload.FriendCandidateResponse;
 import dev.sjimo.oop2024project.payload.MessageRequest;
 import dev.sjimo.oop2024project.payload.MessageResponse;
 import dev.sjimo.oop2024project.repository.ChatMemberRepository;
@@ -181,8 +180,8 @@ public class MessageService {
         Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new ResponseException(ErrorCode.CHAT_NOT_EXIST));
 
         ChatMember chatMember = chatMemberRepository.findByUser_IdAndChat_Id(userId, chatId).orElseThrow(() -> new ResponseException(ErrorCode.PERMISSION_DENIED));
-        var message = messageRepository.findEarliestMessageIdByChatId(chatId);
-        if (!message.isPresent())
+        var message = messageRepository.findLatestMessageIdByChatId(chatId);
+        if (message.isEmpty())
             return null;
         Message latestMessage = message.get();
         return new MessageResponse(latestMessage.getId(), latestMessage.getMessage(), latestMessage.getUser(), chat, latestMessage.getCreatedDate(), latestMessage.getStatus());
@@ -202,8 +201,20 @@ public class MessageService {
             throw new ResponseException(ErrorCode.MESSAGE_NOT_EXIST);
         Pageable pageable = PageRequest.of(0, limit); // limit 是你想要的条数
         var messages = messageRepository.findMessagesBefore(chatId, messageId, pageable);
-        return messages.stream().map(m -> {
-            return new MessageResponse(m.getId(), m.getMessage(), m.getUser(), m.getChat(), m.getCreatedDate(), m.getStatus());
-        }).toList();
+        return messages.stream().map(m -> new MessageResponse(m.getId(), m.getMessage(), m.getUser(), m.getChat(), m.getCreatedDate(), m.getStatus())).toList();
+    }
+
+    /**
+     * 获取比这条信息更新的消息
+     */
+    public List<MessageResponse> getMessagesAfter(Long userId, Long messageId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
+        if (!user.isVerified())
+            throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
+        Message message = messageRepository.findById(messageId).orElseThrow(() -> new ResponseException(ErrorCode.MESSAGE_NOT_EXIST));
+        Long chatId = message.getChat().getId();
+        ChatMember chatMember = chatMemberRepository.findByUser_IdAndChat_Id(userId, chatId).orElseThrow(() -> new ResponseException(ErrorCode.PERMISSION_DENIED));
+        var messages = messageRepository.findMessagesAfter(chatId, messageId);
+        return messages.stream().map(m -> new MessageResponse(m.getId(), m.getMessage(), m.getUser(), m.getChat(), m.getCreatedDate(), m.getStatus())).toList();
     }
 }

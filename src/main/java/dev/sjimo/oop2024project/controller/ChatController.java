@@ -62,6 +62,24 @@ public class ChatController {
         chatService.removeMember(adminId, userId, groupId);
     }
 
+    @PostMapping("/group/{groupId}/user/{userId}/administrator")
+    public void grantAdministrator(@RequestHeader("Authorization") String jwtToken, @PathVariable Long groupId, @PathVariable Long userId) {
+        Long owner = jwtService.extractUserId(jwtToken.replace("Bearer ", ""));
+        chatService.grantAdministrator(owner, userId, groupId);
+    }
+
+    @DeleteMapping("/group/{groupId}/user/{userId}/administrator")
+    public void removeAdministrator(@RequestHeader("Authorization") String jwtToken, @PathVariable Long groupId, @PathVariable Long userId) {
+        Long owner = jwtService.extractUserId(jwtToken.replace("Bearer ", ""));
+        chatService.removeAdministrator(owner, userId, groupId);
+    }
+
+    @PostMapping("/group/{groupId}/user/{userId}/owner")
+    public void changeGroupOwner(@RequestHeader("Authorization") String jwtToken, @PathVariable Long groupId, @PathVariable Long userId) {
+        Long owner = jwtService.extractUserId(jwtToken.replace("Bearer ", ""));
+        chatService.changeGroupOwner(owner, userId, groupId);
+    }
+
     @PostMapping("/group/{groupId}/invite/{userId}")
     public void sendInvitation(@RequestHeader("Authorization") String jwtToken, @PathVariable Long groupId, @PathVariable Long userId, @RequestBody GroupInvitationRequest groupInvitationRequest) {
         Long issuerId = jwtService.extractUserId(jwtToken.replace("Bearer ", ""));
@@ -91,8 +109,6 @@ public class ChatController {
         Long userId = jwtService.extractUserId(jwtToken.replace("Bearer ", ""));
         chatService.rejectChatInvitation(userId, chatToMemberCandidateId);
     }
-
-
 
     @PostMapping("/group/{groupId}/apply_for")
     public void applyToJoinGroup(@RequestHeader("Authorization") String jwtToken, @PathVariable Long groupId, @RequestBody ApplyForGroupRequest applyForGroupRequest) {

@@ -9,16 +9,16 @@ import java.time.LocalDateTime;
 public class MessageResponse {
     private Long id;
     private String message;
-    private User user;
-    private Chat chat;
+    private Long userId;
+    private Long chatId;
     private LocalDateTime createdDate;
     private Message.Status status;
 
     public MessageResponse(Long id, String message, User user, Chat chat, LocalDateTime createdDate, Message.Status status) {
         this.id = id;
         this.message = message;
-        this.user = user;
-        this.chat = chat;
+        this.userId = user.getId();
+        this.chatId = chat.getId();
         this.createdDate = createdDate;
         this.status = status;
     }
@@ -30,12 +30,12 @@ public class MessageResponse {
         return message;
     }
 
-    public User getUser() {
-        return user;
+    public Long getUserId() {
+        return userId;
     }
 
-    public Chat getChat() {
-        return chat;
+    public Long getChatId() {
+        return chatId;
     }
 
     public LocalDateTime getCreatedDate() {

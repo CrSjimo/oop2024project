@@ -69,6 +69,8 @@ public class ChatService {
 
     //用户加入群聊
     private void joinGroupChat(User user, Chat chat) {
+        if (chatMemberRepository.existsByUser_IdAndChat_Id(user.getId(), chat.getId()))
+            return;
         ChatMember chatMemberEntity = new ChatMember();
         chatMemberEntity.setChat(chat);
         chatMemberEntity.setUser(user);
@@ -97,7 +99,7 @@ public class ChatService {
             throw new ResponseException(ErrorCode.INVITATION_ALREADY_EXIST);
         }
 
-        if (chatMemberRepository.existsByUser_IdAndChat_Id(chatId, userId)) {
+        if (chatMemberRepository.existsByUser_IdAndChat_Id(userId, chatId)) {
             throw new ResponseException(ErrorCode.USER_ALREADY_EXIST);
         }
 
@@ -337,7 +339,7 @@ public class ChatService {
                 .filter(cm -> cm.getMemberType() == ChatMember.MemberType.GROUP_OWNER)
                 .orElseThrow(() -> new ResponseException(ErrorCode.PERMISSION_DENIED));
         ChatMember newchatMember = chatMemberRepository.findByUser_IdAndChat_Id(newOwnerId,chatId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_IN_GROUP));
-        if (ownerId == newOwnerId)
+        if (ownerId.equals(newOwnerId))
             throw new ResponseException(ErrorCode.PERMISSION_DENIED);
         ownerChatMember.setMemberType(ChatMember.MemberType.ADMINISTRATOR);
         newchatMember.setMemberType(ChatMember.MemberType.GROUP_OWNER);
