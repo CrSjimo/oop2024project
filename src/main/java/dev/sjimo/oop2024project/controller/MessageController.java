@@ -36,7 +36,6 @@ public class MessageController {
     }
 
     @DeleteMapping("/deleteMessage/{userId}/{chatId}/{messageId}")
-
     public void revokeMessage(@RequestHeader("Authorization") String jwtToken,@PathVariable Long userId, @PathVariable Long chatId, @PathVariable Long messageId) {
         Long userId1 = jwtService.extractUserId(jwtToken.replace("Bearer ", ""));
         if (!userId1.equals(userId)) {
@@ -54,6 +53,25 @@ public class MessageController {
         }
         return messageService.getMessage(userId, chatId);
     }
+
+    @GetMapping("/getMessageInLimit/{userId}/{chatId}/{limit}")
+    public List<MessageResponse> getMessagesInLimit(@RequestHeader("Authorization") String jwtToken, @PathVariable Long userId, @PathVariable Long messageId, @PathVariable Integer limit) {
+        Long ownerId = jwtService.extractUserId(jwtToken.replace("Bearer ", ""));
+        if (!userId.equals(ownerId)) {
+            throw new ResponseException(ErrorCode.PERMISSION_DENIED);
+        }
+        return messageService.getMessages(userId, messageId, limit);
+    }
+
+    @PostMapping("/getLatestMessage/{userId}/{chatId}")
+    public MessageResponse getLatestMessage(@RequestHeader("Authorization") String jwtToken, @PathVariable Long userId, @PathVariable Long chatId) {
+        Long ownerId = jwtService.extractUserId(jwtToken.replace("Bearer ", ""));
+        if (!userId.equals(ownerId)) {
+            throw new ResponseException(ErrorCode.PERMISSION_DENIED);
+        }
+        return messageService.getLatestMessage(userId, chatId);
+    }
+
     // announcement
     @PostMapping("/announcements/{userId}/{chatId}")
     public Message sendAnnouncement(@RequestHeader("Authorization") String jwtToken,@PathVariable Long userId, @PathVariable Long chatId, @RequestBody MessageRequest messageRequest) {
