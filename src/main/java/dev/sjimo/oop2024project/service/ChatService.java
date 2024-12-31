@@ -339,7 +339,7 @@ public class ChatService {
         ChatMember newchatMember = chatMemberRepository.findByUser_IdAndChat_Id(newOwnerId,chatId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_IN_GROUP));
         if (ownerId == newOwnerId)
             throw new ResponseException(ErrorCode.PERMISSION_DENIED);
-        ownerChatMember.setMemberType(ChatMember.MemberType.REGULAR_MEMBER);
+        ownerChatMember.setMemberType(ChatMember.MemberType.ADMINISTRATOR);
         newchatMember.setMemberType(ChatMember.MemberType.GROUP_OWNER);
         chatMemberRepository.save(ownerChatMember);
         chatMemberRepository.save(newchatMember);
@@ -399,21 +399,21 @@ public class ChatService {
     }
 
     /**
-     * 解散群聊
+     * 解散群聊或者退出群聊
      */
     public void deleteChat(Long ownerId,Long chatId) {
         User user = userRepository.findById(ownerId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
         if (!user.isVerified())
             throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
         ChatMember chatMember = chatMemberRepository.findByUser_IdAndChat_Id(ownerId,chatId)
-                .filter(cm -> cm.getMemberType() == ChatMember.MemberType.GROUP_OWNER)
                 .orElseThrow(() -> new ResponseException(ErrorCode.PERMISSION_DENIED));
-        var chatMembers = chatMemberRepository.findAllByChat_Id(chatId);
-        for (ChatMember cm : chatMembers) {
-            chatMemberRepository.delete(cm);
+        if (chatMember.getMemberType() == ChatMember.MemberType.GROUP_OWNER) {
+            Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new ResponseException(ErrorCode.CHAT_NOT_EXIST));
+            chatRepository.delete(chat);
+        } else {
+            chatMemberRepository.delete(chatMember);
         }
-        Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new ResponseException(ErrorCode.CHAT_NOT_EXIST));
-        chatRepository.delete(chat);
+
     }
     /**
     *   获取群信息
@@ -423,7 +423,6 @@ public class ChatService {
         if (!user.isVerified())
             throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
         Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new ResponseException(ErrorCode.CHAT_NOT_EXIST));
-        ChatMember chatMember = chatMemberRepository.findByUser_IdAndChat_Id(userId,chatId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_IN_GROUP));
         return new ChatResponse(chat.getId(),chat.getName(),chat.getType(),null,null,chat.getCreatedDate());
     }
     /**

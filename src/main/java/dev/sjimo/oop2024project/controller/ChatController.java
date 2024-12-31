@@ -44,10 +44,22 @@ public class ChatController {
         return chatService.getGroupChat(memberId, groupId);
     }
 
-    @GetMapping("/group/{groupId}/users")
-    public Object getGroupUsers(@RequestHeader("Authorization") String jwtToken, @PathVariable Long groupId) {
+    @DeleteMapping("/group/{groupId}")
+    public void deleteOrQuitGroup(@RequestHeader("Authorization") String jwtToken, @PathVariable Long groupId) {
+        Long memberId = jwtService.extractUserId(jwtToken.replace("Bearer ", ""));
+        chatService.deleteChat(memberId, groupId);
+    }
+
+    @GetMapping("/group/{groupId}/user")
+    public List<ChatMemberResponse> getGroupUsers(@RequestHeader("Authorization") String jwtToken, @PathVariable Long groupId) {
         Long memberId = jwtService.extractUserId(jwtToken.replace("Bearer ", ""));
         return chatService.getChatMember(memberId, groupId);
+    }
+
+    @DeleteMapping("/group/{groupId}/user/{userId}")
+    public void removeMember(@RequestHeader("Authorization") String jwtToken, @PathVariable Long groupId, @PathVariable Long userId) {
+        Long adminId = jwtService.extractUserId(jwtToken.replace("Bearer ", ""));
+        chatService.removeMember(adminId, userId, groupId);
     }
 
     @PostMapping("/group/{groupId}/invite/{userId}")
@@ -56,7 +68,7 @@ public class ChatController {
         chatService.sendInvitation(issuerId, userId, groupId, groupInvitationRequest.getMessage());
     }
 
-    @GetMapping("/group/{groupId}/invitations")
+    @GetMapping("/group/{groupId}/invitation")
     public List<ChatToMemberCandidateResponse> getGroupInvitationsOfGroup(@RequestHeader("Authorization") String jwtToken, @PathVariable Long groupId) {
         Long userId = jwtService.extractUserId(jwtToken.replace("Bearer ", ""));
         return chatService.getGroupChatInvitation(userId, groupId);
@@ -68,13 +80,13 @@ public class ChatController {
         return chatService.getGroupChatApplication(userId);
     }
 
-    @GetMapping("/group_invitation/{chatToMemberCandidateId}/accept")
+    @PostMapping("/group_invitation/{chatToMemberCandidateId}/accept")
     public void acceptChatInvitation(@RequestHeader("Authorization") String jwtToken, @PathVariable Long chatToMemberCandidateId) {
         Long userId = jwtService.extractUserId(jwtToken.replace("Bearer ", ""));
         chatService.acceptChatInvitation(userId, chatToMemberCandidateId);
     }
 
-    @GetMapping("/group_invitation/{chatToMemberCandidateId}/reject")
+    @PostMapping("/group_invitation/{chatToMemberCandidateId}/reject")
     public void rejectChatInvitation(@RequestHeader("Authorization") String jwtToken, @PathVariable Long chatToMemberCandidateId) {
         Long userId = jwtService.extractUserId(jwtToken.replace("Bearer ", ""));
         chatService.rejectChatInvitation(userId, chatToMemberCandidateId);
