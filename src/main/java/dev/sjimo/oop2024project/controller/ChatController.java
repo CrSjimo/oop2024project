@@ -118,4 +118,38 @@ public class ChatController {
             throw new ResponseException(ErrorCode.PERMISSION_DENIED);
         return chatService.getAllChat(userId);
     }
+
+    @GetMapping("/change_group_owner/{ownerId}/{newOwnerId}/{chatId}")
+    public void changeGroupOwner(@RequestHeader("Authorization") String jwtToken, @PathVariable Long ownerId, @PathVariable Long newOwnerId, @PathVariable Long chatId) {
+        if (!ownerId.equals(jwtService.extractUserId(jwtToken.replace("Bearer ", ""))))
+            throw new ResponseException(ErrorCode.PERMISSION_DENIED);
+        chatService.changeGroupOwner(ownerId,newOwnerId,chatId);
+    }
+
+    @GetMapping("/grantAdministrator/{ownerId}/{userId}/{chatId}")
+    public void grantAdministrator(@RequestHeader("Authorization") String jwtToken, @PathVariable Long ownerId, @PathVariable Long userId, @PathVariable Long chatId) {
+        if (!ownerId.equals(jwtService.extractUserId(jwtToken.replace("Bearer ", ""))))
+            throw new ResponseException(ErrorCode.PERMISSION_DENIED);
+        chatService.grantAdministrator(ownerId,userId,chatId);
+    }
+
+    @GetMapping("/removeAdministrator/{ownerId}/{administratorId}/{chatId}")
+    public void removeAdministrator(@RequestHeader("Authorization") String jwtToken, @PathVariable Long ownerId, @PathVariable Long administratorId, @PathVariable Long chatId) {
+        if (!ownerId.equals(jwtService.extractUserId(jwtToken.replace("Bearer ", ""))))
+            throw new ResponseException(ErrorCode.PERMISSION_DENIED);
+        chatService.removeAdministrator(ownerId,administratorId,chatId);
+    }
+    @GetMapping("/removeMember/{administratorId}/{userId}/{chatId}")
+    public void removeMember(@RequestHeader("Authorization") String jwtToken, @PathVariable Long administratorId, @PathVariable Long userId, @PathVariable Long chatId) {
+        if (!administratorId.equals(jwtService.extractUserId(jwtToken.replace("Bearer ", ""))))
+            throw new ResponseException(ErrorCode.PERMISSION_DENIED);
+        chatService.removeMember(administratorId,userId,chatId);
+    }
+
+    @GetMapping("/deleteChat/{ownerId}/{chatId}")
+    public void deleteChat(@RequestHeader("Authorization") String jwtToken, @PathVariable Long ownerId, @PathVariable Long chatId) {
+        if (!ownerId.equals(jwtService.extractUserId(jwtToken.replace("Bearer ", ""))))
+            throw new ResponseException(ErrorCode.PERMISSION_DENIED);
+        chatService.deleteChat(ownerId,chatId);
+    }
 }
