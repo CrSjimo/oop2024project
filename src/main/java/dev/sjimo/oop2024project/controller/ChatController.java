@@ -9,6 +9,7 @@ import dev.sjimo.oop2024project.utils.ResponseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -144,6 +145,16 @@ public class ChatController {
     public List<ChatResponse> getAllGroupSelfIn(@RequestHeader("Authorization") String jwtToken, @PathVariable Long userId) {
         if (!userId.equals(jwtService.extractUserId(jwtToken.replace("Bearer ", ""))))
             throw new ResponseException(ErrorCode.PERMISSION_DENIED);
-        return chatService.getAllChat(userId);
+        return chatService.getAllGroup(userId);
+    }
+
+    @GetMapping("/chats_of/{userId}")
+    public List<ChatResponse> getAllChats(@RequestHeader("Authorization") String jwtToken, @PathVariable Long userId) {
+        if (!userId.equals(jwtService.extractUserId(jwtToken.replace("Bearer ", ""))))
+            throw new ResponseException(ErrorCode.PERMISSION_DENIED);
+        var list = new ArrayList<ChatResponse>();
+        list.addAll(chatService.getAllPrivateChat(userId));
+        list.addAll(chatService.getAllGroup(userId));
+        return list;
     }
 }

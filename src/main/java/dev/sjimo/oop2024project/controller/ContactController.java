@@ -33,7 +33,6 @@ public class ContactController {
             throw new ResponseException(ErrorCode.PERMISSION_DENIED);
         }
 
-        //TODO 更新备注名等信息
         contactService.updateFriendData(user1Id,user2Id,updateFriendRequest.getCommentName());
 
     }

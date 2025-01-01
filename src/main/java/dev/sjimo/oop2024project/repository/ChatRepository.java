@@ -16,4 +16,6 @@ public interface ChatRepository extends JpaRepository<Chat, Long> {
         WHERE (c.user1 = :user1 AND c.user2 = :user2) OR (c.user1 = :user2 AND c.user2 = :user1)
     """)
     Optional<Chat> findPrivateChat(User user1, User user2);
+
+    List<Chat> findByUser1OrUser2(User user1, User user2);
 }

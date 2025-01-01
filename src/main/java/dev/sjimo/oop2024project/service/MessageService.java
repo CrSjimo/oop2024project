@@ -36,6 +36,16 @@ public class MessageService {
     @Autowired
     private ChatMemberRepository chatMemberRepository;
 
+    private void checkIsMember(User user, Chat chat) {
+        if (chat.getUser1().isPresent() && chat.getUser1().get().getId().equals(user.getId())) {
+            return;
+        }
+        if (chat.getUser2().isPresent() && chat.getUser2().get().getId().equals(user.getId())) {
+            return;
+        }
+        chatMemberRepository.findByUser_IdAndChat_Id(user.getId(), chat.getId()).orElseThrow(() -> new ResponseException(ErrorCode.PERMISSION_DENIED));
+    }
+
     /**
      * 用户向chatroom发送消息
      *
@@ -50,8 +60,7 @@ public class MessageService {
 
         Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new ResponseException(ErrorCode.CHAT_NOT_EXIST));
 
-        ChatMember chatMember = chatMemberRepository.findByUser_IdAndChat_Id(userId, chatId)
-                .orElseThrow(() -> new ResponseException(ErrorCode.PERMISSION_DENIED));
+        checkIsMember(user, chat);
 
         Message messageEntity = new Message();
         messageEntity.setChat(chat);
@@ -92,58 +101,6 @@ public class MessageService {
     }
 
     /**
-     * 群聊管理员发布群公告
-     *
-     * @param userId
-     * @param chatId
-     * @param message
-     */
-    public Message sendAnnouncement(Long userId, Long chatId, String message) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
-        if (!user.isVerified())
-            throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
-
-        Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new ResponseException(ErrorCode.CHAT_NOT_EXIST));
-
-        ChatMember chatMember = chatMemberRepository.findByUser_IdAndChat_Id(userId, chatId)
-                .filter(cm -> cm.getMemberType() == ChatMember.MemberType.GROUP_OWNER || cm.getMemberType() == ChatMember.MemberType.ADMINISTRATOR)
-                .orElseThrow(() -> new ResponseException(ErrorCode.PERMISSION_DENIED));
-
-        Message messageEntity = new Message();
-        messageEntity.setChat(chat);
-        messageEntity.setStatus(Message.Status.UNREAD);
-        messageEntity.setUser(user);
-        messageEntity.setMessage(message);
-        messageEntity.setCreatedDate(LocalDateTime.now());
-        return messageRepository.save(messageEntity);
-    }
-
-    /**
-     * 撤销群公告
-     *
-     * @param userId
-     * @param chatId
-     * @param messageId
-     */
-    public void revokeGroupAnnouncement(Long userId, Long chatId, Long messageId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
-        if (!user.isVerified())
-            throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
-
-        Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new ResponseException(ErrorCode.CHAT_NOT_EXIST));
-
-        ChatMember chatMember = chatMemberRepository.findByUser_IdAndChat_Id(userId, chatId)
-                .filter(cm -> cm.getMemberType() == ChatMember.MemberType.GROUP_OWNER || cm.getMemberType() == ChatMember.MemberType.ADMINISTRATOR)
-                .orElseThrow(() -> new ResponseException(ErrorCode.PERMISSION_DENIED));
-
-        Message message = messageRepository.findById(messageId).orElseThrow(() -> new ResponseException(ErrorCode.MESSAGE_NOT_EXIST));
-        if (!message.getChat().equals(chat)) {
-            throw new ResponseException(ErrorCode.PERMISSION_DENIED);
-        }
-        messageRepository.delete(message);
-    }
-
-    /**
      * 获取指定的消息？
      *
      * @param userId
@@ -156,7 +113,7 @@ public class MessageService {
 
         Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new ResponseException(ErrorCode.CHAT_NOT_EXIST));
 
-        ChatMember chatMember = chatMemberRepository.findByUser_IdAndChat_Id(userId, chatId).orElseThrow(() -> new ResponseException(ErrorCode.PERMISSION_DENIED));
+        checkIsMember(user, chat);
         var allMessages = messageRepository.findAllByUser_IdAndChat_Id(userId, chatId);
         return allMessages.stream().map(message -> {
             MessageResponse messageResponse = new MessageResponse(
@@ -179,7 +136,7 @@ public class MessageService {
             throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
         Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new ResponseException(ErrorCode.CHAT_NOT_EXIST));
 
-        ChatMember chatMember = chatMemberRepository.findByUser_IdAndChat_Id(userId, chatId).orElseThrow(() -> new ResponseException(ErrorCode.PERMISSION_DENIED));
+        checkIsMember(user, chat);
         var message = messageRepository.findLatestMessageIdByChatId(chatId);
         if (message.isEmpty())
             return null;
@@ -196,7 +153,7 @@ public class MessageService {
             throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
         Message message = messageRepository.findById(messageId).orElseThrow(() -> new ResponseException(ErrorCode.MESSAGE_NOT_EXIST));
         Long chatId = message.getChat().getId();
-        ChatMember chatMember = chatMemberRepository.findByUser_IdAndChat_Id(userId, chatId).orElseThrow(() -> new ResponseException(ErrorCode.PERMISSION_DENIED));
+        checkIsMember(user, message.getChat());
         if (limit < 0)
             throw new ResponseException(ErrorCode.MESSAGE_NOT_EXIST);
         Pageable pageable = PageRequest.of(0, limit); // limit 是你想要的条数
@@ -213,7 +170,7 @@ public class MessageService {
             throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
         Message message = messageRepository.findById(messageId).orElseThrow(() -> new ResponseException(ErrorCode.MESSAGE_NOT_EXIST));
         Long chatId = message.getChat().getId();
-        ChatMember chatMember = chatMemberRepository.findByUser_IdAndChat_Id(userId, chatId).orElseThrow(() -> new ResponseException(ErrorCode.PERMISSION_DENIED));
+        checkIsMember(user, message.getChat());
         var messages = messageRepository.findMessagesAfter(chatId, messageId);
         return messages.stream().map(m -> new MessageResponse(m.getId(), m.getMessage(), m.getUser(), m.getChat(), m.getCreatedDate(), m.getStatus())).toList();
     }
