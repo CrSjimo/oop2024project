@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface MemberToChatCandidateRepository extends JpaRepository<MemberToChatCandidate, Long> {
+    boolean existsByUser_IdAndChat_IdAndStatus(Long userId, Long chatId, MemberToChatCandidate.Status status);
+
     Optional<MemberToChatCandidate> findByUser_IdAndChat_Id(Long userId, Long chatId);
 
     List<MemberToChatCandidate> findAllByUser_IdOrderByCreatedDate(Long userId);

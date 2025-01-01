@@ -17,4 +17,19 @@ public interface ChatRepository extends JpaRepository<Chat, Long> {
     Optional<Chat> findPrivateChat(User user1, User user2);
 
     List<Chat> findByUser1OrUser2(User user1, User user2);
+
+    @Query("""
+                SELECT c
+                FROM Chat c
+                WHERE
+                    c.type = 1 AND (c.name LIKE CONCAT('%', :searchString, '%') OR c.id = CAST(:searchString AS LONG))
+                ORDER BY
+                    CASE
+                        WHEN c.id = CAST(:searchString AS LONG) THEN 1
+                        WHEN c.name LIKE CONCAT('%', :searchString, '%') THEN LENGTH(c.name)
+                        ELSE 1
+                    END
+                    ASC
+            """)
+    List<Chat> findByChatLike(String searchString);
 }

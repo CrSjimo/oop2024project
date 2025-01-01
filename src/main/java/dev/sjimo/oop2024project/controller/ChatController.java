@@ -45,6 +45,12 @@ public class ChatController {
         return chatService.getGroupChat(memberId, groupId);
     }
 
+    @PostMapping("/group/{groupId}")
+    public void setGroupName(@RequestHeader("Authorization") String jwtToken, @PathVariable Long groupId, @RequestBody SetGroupInfoRequest request) {
+        Long ownerId = jwtService.extractUserId(jwtToken.replace("Bearer ", ""));
+        chatService.changeGroupName(ownerId, groupId, request.getName());
+    }
+
     @DeleteMapping("/group/{groupId}")
     public void deleteOrQuitGroup(@RequestHeader("Authorization") String jwtToken, @PathVariable Long groupId) {
         Long memberId = jwtService.extractUserId(jwtToken.replace("Bearer ", ""));
@@ -156,5 +162,10 @@ public class ChatController {
         list.addAll(chatService.getAllPrivateChat(userId));
         list.addAll(chatService.getAllGroup(userId));
         return list;
+    }
+
+    @GetMapping("/find")
+    public List<ChatResponse> findGroup(@RequestParam String q) {
+        return chatService.findGroup(q);
     }
 }

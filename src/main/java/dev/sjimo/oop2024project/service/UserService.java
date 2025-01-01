@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.NoSuchElementException;
-import java.util.UUID;
 
 @Service
 public class UserService {
@@ -94,17 +93,4 @@ public class UserService {
         mailService.sendVerificationEmail(email, token);
     }
 
-    public void resetEmail(String email, Long userId) {
-        var user = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
-        if (!user.isVerified()) {
-            throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
-        }
-        user.setEmail(email);
-        userRepository.save(user);
-    }
-
-    public void verifyEmail(Long userId, String token) {
-        String verifyCode = UUID.randomUUID().toString().substring(0, 6);
-
-    }
 }

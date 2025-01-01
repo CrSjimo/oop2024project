@@ -81,7 +81,7 @@ public class ChatService {
         if (!user.isVerified()) throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
         Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new ResponseException(ErrorCode.CHAT_NOT_EXIST));
 
-        ChatMember chatMember = chatMemberRepository.findByUser_IdAndChat_Id(issuerId, chatId).filter(cm -> cm.getMemberType() == ChatMember.MemberType.GROUP_OWNER || cm.getMemberType() == ChatMember.MemberType.ADMINISTRATOR).orElseThrow(() -> new ResponseException(ErrorCode.PERMISSION_DENIED));
+        chatMemberRepository.findByUser_IdAndChat_Id(issuerId, chatId).filter(cm -> cm.getMemberType() == ChatMember.MemberType.GROUP_OWNER || cm.getMemberType() == ChatMember.MemberType.ADMINISTRATOR).orElseThrow(() -> new ResponseException(ErrorCode.PERMISSION_DENIED));
 
         if (chat.getType() != Chat.Type.GROUP_CHAT) throw new ResponseException(ErrorCode.CHAT_NOT_GROUP);
 
@@ -117,7 +117,7 @@ public class ChatService {
 
         if (chat.getType() != Chat.Type.GROUP_CHAT) throw new ResponseException(ErrorCode.CHAT_NOT_GROUP);
 
-        if (chatToMemberCandidateRepository.existsByUser_IdAndChat_IdAndStatus(userId, chatId, ChatToMemberCandidate.Status.PENDING)) {
+        if (memberToChatCandidateRepository.existsByUser_IdAndChat_IdAndStatus(userId, chatId, MemberToChatCandidate.Status.PENDING)) {
             throw new ResponseException(ErrorCode.INVITATION_ALREADY_EXIST);
         }
 
@@ -125,14 +125,14 @@ public class ChatService {
             throw new ResponseException(ErrorCode.USER_ALREADY_EXIST);
         }
 
-        var chatToMemberCandidate = chatToMemberCandidateRepository.findByUser_IdAndChat_Id(userId, chatId);
-        if (chatToMemberCandidate.isPresent()) {
+        if (chatToMemberCandidateRepository.existsByUser_IdAndChat_IdAndStatus(userId, chatId, ChatToMemberCandidate.Status.PENDING)) {
             joinGroupChat(user, chat);
             return;
         }
         MemberToChatCandidate memberToChatCandidateEntity = new MemberToChatCandidate();
         memberToChatCandidateEntity.setChat(chat);
         memberToChatCandidateEntity.setUser(user);
+        memberToChatCandidateEntity.setMessage(message);
         memberToChatCandidateEntity.setStatus(MemberToChatCandidate.Status.PENDING);
         memberToChatCandidateRepository.save(memberToChatCandidateEntity);
     }
@@ -183,7 +183,7 @@ public class ChatService {
 
         User user = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
         if (!user.isVerified()) throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
-        ChatMember chatMember = chatMemberRepository.findByUser_IdAndChat_Id(userId, memberToChatCandidate.getChat().getId()).filter(cm -> cm.getMemberType() == ChatMember.MemberType.GROUP_OWNER || cm.getMemberType() == ChatMember.MemberType.ADMINISTRATOR).orElseThrow(() -> new ResponseException(ErrorCode.PERMISSION_DENIED));
+        chatMemberRepository.findByUser_IdAndChat_Id(userId, memberToChatCandidate.getChat().getId()).filter(cm -> cm.getMemberType() == ChatMember.MemberType.GROUP_OWNER || cm.getMemberType() == ChatMember.MemberType.ADMINISTRATOR).orElseThrow(() -> new ResponseException(ErrorCode.PERMISSION_DENIED));
 
         memberToChatCandidate.setStatus(MemberToChatCandidate.Status.ACCEPTED);
         memberToChatCandidateRepository.save(memberToChatCandidate);
@@ -201,7 +201,7 @@ public class ChatService {
 
         User user = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
         if (!user.isVerified()) throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
-        ChatMember chatMember = chatMemberRepository.findByUser_IdAndChat_Id(userId, memberToChatCandidate.getChat().getId()).filter(cm -> cm.getMemberType() == ChatMember.MemberType.GROUP_OWNER || cm.getMemberType() == ChatMember.MemberType.ADMINISTRATOR).orElseThrow(() -> new ResponseException(ErrorCode.PERMISSION_DENIED));
+        chatMemberRepository.findByUser_IdAndChat_Id(userId, memberToChatCandidate.getChat().getId()).filter(cm -> cm.getMemberType() == ChatMember.MemberType.GROUP_OWNER || cm.getMemberType() == ChatMember.MemberType.ADMINISTRATOR).orElseThrow(() -> new ResponseException(ErrorCode.PERMISSION_DENIED));
 
         memberToChatCandidate.setStatus(MemberToChatCandidate.Status.REJECTED);
         memberToChatCandidateRepository.save(memberToChatCandidate);
@@ -265,7 +265,7 @@ public class ChatService {
     public List<ChatToMemberCandidateResponse> getGroupChatInvitation(Long userId, Long chatId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
         if (!user.isVerified()) throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
-        ChatMember chatMember = chatMemberRepository.findByUser_IdAndChat_Id(userId, chatId).filter(cm -> cm.getMemberType() == ChatMember.MemberType.GROUP_OWNER || cm.getMemberType() == ChatMember.MemberType.ADMINISTRATOR).orElseThrow(() -> new ResponseException(ErrorCode.PERMISSION_DENIED));
+        chatMemberRepository.findByUser_IdAndChat_Id(userId, chatId).filter(cm -> cm.getMemberType() == ChatMember.MemberType.GROUP_OWNER || cm.getMemberType() == ChatMember.MemberType.ADMINISTRATOR).orElseThrow(() -> new ResponseException(ErrorCode.PERMISSION_DENIED));
         var chatToMemberCandidates = chatToMemberCandidateRepository.findAllByChat_IdOrderByCreatedDate(chatId);
         return chatToMemberCandidates.stream().map(chatToMemberCandidate -> {
             ChatToMemberCandidateResponse chatToMemberCandidateResponse = new ChatToMemberCandidateResponse();
@@ -290,7 +290,7 @@ public class ChatService {
         User user = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
         if (!user.isVerified()) throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
         ChatMember chatMember = chatMemberRepository.findByUser_IdAndChat_Id(userId, chatId).filter(cm -> cm.getMemberType() == ChatMember.MemberType.GROUP_OWNER || cm.getMemberType() == ChatMember.MemberType.ADMINISTRATOR).orElseThrow(() -> new ResponseException(ErrorCode.PERMISSION_DENIED));
-        var memberToChatCandidates = memberToChatCandidateRepository.findAllByChat_IdOrderByCreatedDate(userId);
+        var memberToChatCandidates = memberToChatCandidateRepository.findAllByChat_IdOrderByCreatedDate(chatId);
         return memberToChatCandidates.stream().map(memberToChatCandidate -> {
             MemberToChatCandidateResponse memberToChatCandidateResponse = new MemberToChatCandidateResponse();
             memberToChatCandidateResponse.setId(memberToChatCandidate.getId());
@@ -330,7 +330,7 @@ public class ChatService {
         User administrator = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
         if (!owner.isVerified() || !administrator.isVerified())
             throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
-        ChatMember ownerChatMember = chatMemberRepository.findByUser_IdAndChat_Id(ownerId, chatId).filter(cm -> cm.getMemberType() == ChatMember.MemberType.GROUP_OWNER).orElseThrow(() -> new ResponseException(ErrorCode.PERMISSION_DENIED));
+        chatMemberRepository.findByUser_IdAndChat_Id(ownerId, chatId).filter(cm -> cm.getMemberType() == ChatMember.MemberType.GROUP_OWNER).orElseThrow(() -> new ResponseException(ErrorCode.PERMISSION_DENIED));
         ChatMember newchatMember = chatMemberRepository.findByUser_IdAndChat_Id(userId, chatId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_IN_GROUP));
         if (newchatMember.getMemberType() != ChatMember.MemberType.REGULAR_MEMBER)
             throw new ResponseException(ErrorCode.PERMISSION_DENIED);
@@ -346,7 +346,7 @@ public class ChatService {
         User administrator = userRepository.findById(administratorId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
         if (!owner.isVerified() || !administrator.isVerified())
             throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
-        ChatMember ownerChatMember = chatMemberRepository.findByUser_IdAndChat_Id(ownerId, chatId).filter(cm -> cm.getMemberType() == ChatMember.MemberType.GROUP_OWNER).orElseThrow(() -> new ResponseException(ErrorCode.PERMISSION_DENIED));
+        chatMemberRepository.findByUser_IdAndChat_Id(ownerId, chatId).filter(cm -> cm.getMemberType() == ChatMember.MemberType.GROUP_OWNER).orElseThrow(() -> new ResponseException(ErrorCode.PERMISSION_DENIED));
         ChatMember newchatMember = chatMemberRepository.findByUser_IdAndChat_Id(administratorId, chatId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_IN_GROUP));
         if (newchatMember.getMemberType() != ChatMember.MemberType.ADMINISTRATOR)
             throw new ResponseException(ErrorCode.PERMISSION_DENIED);
@@ -362,7 +362,7 @@ public class ChatService {
         User administrator = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
         if (!owner.isVerified() || !administrator.isVerified())
             throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
-        ChatMember ownerChatMember = chatMemberRepository.findByUser_IdAndChat_Id(administratorId, chatId).filter(cm -> cm.getMemberType() == ChatMember.MemberType.GROUP_OWNER || cm.getMemberType() == ChatMember.MemberType.ADMINISTRATOR).orElseThrow(() -> new ResponseException(ErrorCode.PERMISSION_DENIED));
+        chatMemberRepository.findByUser_IdAndChat_Id(administratorId, chatId).filter(cm -> cm.getMemberType() == ChatMember.MemberType.GROUP_OWNER || cm.getMemberType() == ChatMember.MemberType.ADMINISTRATOR).orElseThrow(() -> new ResponseException(ErrorCode.PERMISSION_DENIED));
         ChatMember newchatMember = chatMemberRepository.findByUser_IdAndChat_Id(userId, chatId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_IN_GROUP));
         if (newchatMember.getMemberType() != ChatMember.MemberType.REGULAR_MEMBER)
             throw new ResponseException(ErrorCode.PERMISSION_DENIED);
@@ -402,7 +402,7 @@ public class ChatService {
         User user = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
         if (!user.isVerified()) throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
         Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new ResponseException(ErrorCode.CHAT_NOT_EXIST));
-        ChatMember cm = chatMemberRepository.findByUser_IdAndChat_Id(userId, chatId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_IN_GROUP));
+        chatMemberRepository.findByUser_IdAndChat_Id(userId, chatId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_IN_GROUP));
         var ChatMembers = chatMemberRepository.findAllByChat_Id(chatId);
         return ChatMembers.stream().map(chatMember -> {
             UserData userData = userDataRepository.findByUser_Id(chatMember.getUser().getId()).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
@@ -427,5 +427,19 @@ public class ChatService {
         User user = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
         if (!user.isVerified()) throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
         return chatRepository.findByUser1OrUser2(user, user).stream().map(chat -> new ChatResponse(chat.getId(), chat.getName(), chat.getType(), chat.getUser1().isPresent() ? chat.getUser1().get().getId() : null, chat.getUser2().isPresent() ? chat.getUser2().get().getId() : null, chat.getCreatedDate())).toList();
+    }
+
+    public List<ChatResponse> findGroup(String searchString) {
+        return chatRepository.findByChatLike(searchString).stream().map(chat -> new ChatResponse(chat.getId(), chat.getName(), chat.getType(), null, null, chat.getCreatedDate())).toList();
+    }
+
+    public void changeGroupName(Long ownerId, Long chatId, String name) {
+        User owner = userRepository.findById(ownerId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
+        if (!owner.isVerified())
+            throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
+        Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new ResponseException(ErrorCode.CHAT_NOT_EXIST));
+        chatMemberRepository.findByUser_IdAndChat_Id(ownerId, chatId).filter(cm -> cm.getMemberType() == ChatMember.MemberType.GROUP_OWNER).orElseThrow(() -> new ResponseException(ErrorCode.PERMISSION_DENIED));
+        chat.setName(name);
+        chatRepository.save(chat);
     }
 }
