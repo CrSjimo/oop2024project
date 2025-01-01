@@ -1,6 +1,5 @@
 package dev.sjimo.oop2024project.controller;
 
-import dev.sjimo.oop2024project.utils.ErrorCode;
 import dev.sjimo.oop2024project.utils.ResponseException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

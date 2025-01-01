@@ -6,26 +6,14 @@ import jakarta.persistence.*;
 @Entity
 public class UserData {
 
-    @JsonFormat(shape = JsonFormat.Shape.NUMBER)
-    public enum Gender {
-        OTHER,
-        MALE,
-        FEMALE,
-    }
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String username;
-
     @Enumerated(EnumType.ORDINAL)
     private Gender gender;
-
     private String gravatarEmail;
-
     private String description;
-
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
@@ -72,5 +60,10 @@ public class UserData {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    @JsonFormat(shape = JsonFormat.Shape.NUMBER)
+    public enum Gender {
+        OTHER, MALE, FEMALE,
     }
 }

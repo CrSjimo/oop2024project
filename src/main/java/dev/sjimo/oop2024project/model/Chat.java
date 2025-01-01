@@ -9,26 +9,17 @@ import java.util.Optional;
 
 @Entity
 public class Chat {
-    @JsonFormat(shape = JsonFormat.Shape.NUMBER)
-    public enum Type {
-        PRIVATE_CHAT,
-        GROUP_CHAT,
-    }
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String name;
     @CreationTimestamp
     private LocalDateTime createdDate;
-
     @Enumerated(EnumType.ORDINAL)
     private Type type;
-
     @ManyToOne
     @JoinColumn(name = "user1_id", nullable = true)
     private User user1;
-
     @ManyToOne
     @JoinColumn(name = "user2_id", nullable = true)
     private User user2;
@@ -49,12 +40,12 @@ public class Chat {
         return createdDate;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getName() {
         return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public Optional<User> getUser1() {
@@ -71,5 +62,10 @@ public class Chat {
 
     public void setUser2(User user2) {
         this.user2 = user2;
+    }
+
+    @JsonFormat(shape = JsonFormat.Shape.NUMBER)
+    public enum Type {
+        PRIVATE_CHAT, GROUP_CHAT,
     }
 }

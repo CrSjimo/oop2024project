@@ -5,7 +5,6 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 @Entity
 public class Message {
@@ -14,10 +13,10 @@ public class Message {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "user_id",nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
     @ManyToOne
-    @JoinColumn(name = "chat_id",nullable = false)
+    @JoinColumn(name = "chat_id", nullable = false)
     private Chat chat;
     private String message;
     @CreationTimestamp
@@ -25,36 +24,39 @@ public class Message {
 
     @Enumerated(EnumType.ORDINAL)
     private Status status;
-    @JsonFormat(shape = JsonFormat.Shape.NUMBER)
-    public enum Status {
-        UNREAD,
-        SENDING,
-        READ,
-    }
-
-
 
     public Long getId() {
         return id;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
     }
 
     public User getUser() {
         return user;
     }
 
-    public void setChat(Chat chat){this.chat = chat;}
+    public void setUser(User user) {
+        this.user = user;
+    }
 
-    public Chat getChat(){return this.chat;}
+    public Chat getChat() {
+        return this.chat;
+    }
+
+    public void setChat(Chat chat) {
+        this.chat = chat;
+    }
+
     public LocalDateTime getCreatedDate() {
         return createdDate;
     }
+
+    public void setCreatedDate(LocalDateTime createdDate) {
+        this.createdDate = createdDate;
+    }
+
     public Status getStatus() {
         return status;
     }
+
     public void setStatus(Status status) {
         this.status = status;
     }
@@ -66,7 +68,9 @@ public class Message {
     public void setMessage(String message) {
         this.message = message;
     }
-    public void setCreatedDate(LocalDateTime createdDate) {
-        this.createdDate = createdDate;
+
+    @JsonFormat(shape = JsonFormat.Shape.NUMBER)
+    public enum Status {
+        UNREAD, SENDING, READ,
     }
 }

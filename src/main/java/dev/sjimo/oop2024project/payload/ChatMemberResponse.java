@@ -5,12 +5,13 @@ import dev.sjimo.oop2024project.model.ChatMember;
 import java.time.LocalDateTime;
 
 public class ChatMemberResponse {
-    private Long chatId;
-    private String chatName;
-    private ChatMember.MemberType memberType;
-    private LocalDateTime createdDate;
-    private Long userId;
-    private String userName;
+    private final Long chatId;
+    private final String chatName;
+    private final ChatMember.MemberType memberType;
+    private final LocalDateTime createdDate;
+    private final Long userId;
+    private final String userName;
+
     public ChatMemberResponse(Long chatId, String chatName, ChatMember.MemberType memberType, LocalDateTime createdDate, Long userId, String userName) {
         this.chatId = chatId;
         this.chatName = chatName;
@@ -19,9 +20,11 @@ public class ChatMemberResponse {
         this.userId = userId;
         this.userName = userName;
     }
+
     public Long getChatId() {
         return chatId;
     }
+
     public String getChatName() {
         return chatName;
     }
@@ -33,9 +36,11 @@ public class ChatMemberResponse {
     public LocalDateTime getCreatedDate() {
         return createdDate;
     }
+
     public Long getUserId() {
         return userId;
     }
+
     public String getUserName() {
         return userName;
     }

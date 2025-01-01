@@ -5,12 +5,12 @@ import dev.sjimo.oop2024project.model.Chat;
 import java.time.LocalDateTime;
 
 public class ChatResponse {
-    private Long id;
-    private String name;
-    private Chat.Type type;
-    private LocalDateTime createdDate;
-    private Long user1Id;
-    private Long user2Id;
+    private final Long id;
+    private final String name;
+    private final Chat.Type type;
+    private final LocalDateTime createdDate;
+    private final Long user1Id;
+    private final Long user2Id;
 
     public ChatResponse(Long id, String name, Chat.Type type, Long user1Id, Long user2Id, LocalDateTime createdDate) {
         this.id = id;

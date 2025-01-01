@@ -11,13 +11,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class MailService {
 
+    private final Logger logger = LoggerFactory.getLogger(MailService.class);
     @Autowired
     private JavaMailSender mailSender;
-
     @Value("${oop2024project.debug}")
     private boolean debug;
-
-    private final Logger logger = LoggerFactory.getLogger(MailService.class);
 
     public void sendVerificationEmail(String email, String token) {
         if (debug) {

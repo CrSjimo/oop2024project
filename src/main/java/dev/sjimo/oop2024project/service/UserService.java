@@ -1,10 +1,10 @@
 package dev.sjimo.oop2024project.service;
 
+import dev.sjimo.oop2024project.model.User;
 import dev.sjimo.oop2024project.model.UserData;
 import dev.sjimo.oop2024project.repository.UserDataRepository;
 import dev.sjimo.oop2024project.repository.UserRepository;
 import dev.sjimo.oop2024project.repository.VerificationTokenRepository;
-import dev.sjimo.oop2024project.model.User;
 import dev.sjimo.oop2024project.utils.ErrorCode;
 import dev.sjimo.oop2024project.utils.ResponseException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +39,7 @@ public class UserService {
         User user;
         if (userOpt.isPresent()) {
             user = userOpt.get();
-            if (user.isVerified()){
+            if (user.isVerified()) {
                 throw new ResponseException(ErrorCode.USER_ALREADY_VERIFIED);
             }
         } else {

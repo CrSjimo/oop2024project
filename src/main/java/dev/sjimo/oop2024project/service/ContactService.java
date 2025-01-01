@@ -165,22 +165,22 @@ public class ContactService {
 
     /**
      * 返回拉黑列表
+     *
      * @param userId
      * @return blockList
      */
-    public List<BlockListResponse> getBlockList(Long userId){
+    public List<BlockListResponse> getBlockList(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
         if (!user.isVerified()) {
             throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
         }
         var blockLists = blockListRepository.findAllByUser1_IdOrderByCreatedDate(userId);
         return blockLists.stream().map(blockList -> {
-            BlockListResponse blockListResponse = new BlockListResponse(blockList.getId(),
-                    blockList.getUser2().getId(),
-                    blockList.getCreatedDate());
+            BlockListResponse blockListResponse = new BlockListResponse(blockList.getId(), blockList.getUser2().getId(), blockList.getCreatedDate());
             return blockListResponse;
         }).toList();
     }
+
     /**
      * 接受好友申请
      *
@@ -267,7 +267,7 @@ public class ContactService {
         }).toList();
     }
 
-    public void updateFriendData(Long userId,Long friendId, String name){
+    public void updateFriendData(Long userId, Long friendId, String name) {
         User user1 = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
         var user2 = userRepository.findById(friendId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
         if (!user1.isVerified() || !user2.isVerified()) {

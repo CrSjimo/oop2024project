@@ -1,14 +1,9 @@
 package dev.sjimo.oop2024project.controller;
 
-import dev.sjimo.oop2024project.model.Message;
-import dev.sjimo.oop2024project.payload.FriendApplicationRequest;
 import dev.sjimo.oop2024project.payload.MessageRequest;
 import dev.sjimo.oop2024project.payload.MessageResponse;
 import dev.sjimo.oop2024project.service.JwtService;
 import dev.sjimo.oop2024project.service.MessageService;
-import dev.sjimo.oop2024project.service.PushService;
-import dev.sjimo.oop2024project.utils.ErrorCode;
-import dev.sjimo.oop2024project.utils.ResponseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,13 +14,10 @@ import java.util.List;
 public class MessageController {
     @Autowired
     private MessageService messageService;
-
     @Autowired
     private JwtService jwtService;
 
-    PushService pushService = new PushService();
-
-    @PutMapping( "/chat/{chatId}")
+    @PutMapping("/chat/{chatId}")
     public void sendMessage(@RequestHeader("Authorization") String jwtToken, @PathVariable Long chatId, @RequestBody MessageRequest messageRequest) {
         Long userId = jwtService.extractUserId(jwtToken.replace("Bearer ", ""));
         messageService.sendMessage(userId, chatId, messageRequest);

@@ -9,7 +9,6 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.crypto.SecretKey;
 import java.util.Date;
 
 @Service
@@ -21,22 +20,12 @@ public class JwtService {
 
     public String generateToken(Long userId) {
         var user = userRepository.findById(userId).orElseThrow();
-        return Jwts.builder()
-                .subject(String.valueOf(userId))
-                .claim("pwd", user.getPassword())
-                .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 24 * 100))
-                .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
-                .compact();
+        return Jwts.builder().subject(String.valueOf(userId)).claim("pwd", user.getPassword()).issuedAt(new Date()).expiration(new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 24 * 100)).signWith(SignatureAlgorithm.HS256, SECRET_KEY).compact();
     }
 
     public Long extractUserId(String token) {
         try {
-            var jwtPayload = Jwts.parser()
-                    .setSigningKey(SECRET_KEY)
-                    .build()
-                    .parseSignedClaims(token)
-                    .getPayload();
+            var jwtPayload = Jwts.parser().setSigningKey(SECRET_KEY).build().parseSignedClaims(token).getPayload();
             var userId = Long.parseLong(jwtPayload.getSubject());
             var user = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.PERMISSION_DENIED));
             if (!user.getPassword().equals(jwtPayload.get("pwd").toString())) {

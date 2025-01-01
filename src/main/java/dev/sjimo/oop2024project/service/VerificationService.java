@@ -47,8 +47,7 @@ public class VerificationService {
 
     public User verifyToken(String token) {
         Optional<VerificationToken> verificationTokenOpt = tokenRepository.findByToken(token);
-        if (!(verificationTokenOpt.isPresent() && verificationTokenOpt.get().getToken().equals(token)
-                && verificationTokenOpt.get().getExpiryDate().isAfter(LocalDateTime.now()))) {
+        if (!(verificationTokenOpt.isPresent() && verificationTokenOpt.get().getToken().equals(token) && verificationTokenOpt.get().getExpiryDate().isAfter(LocalDateTime.now()))) {
             throw new ResponseException(ErrorCode.INVALID_VERIFICATION_TOKEN);
         }
         User user = verificationTokenOpt.get().getUser();
@@ -58,16 +57,14 @@ public class VerificationService {
 
     public void verifyForRegistration(String token) {
         User user = verifyToken(token);
-        if (user.isVerified())
-            throw new ResponseException(ErrorCode.USER_ALREADY_VERIFIED);
+        if (user.isVerified()) throw new ResponseException(ErrorCode.USER_ALREADY_VERIFIED);
         user.setVerified(true);
         userRepository.save(user);
     }
 
     public Long verifyForResetPassword(String token) {
         User user = verifyToken(token);
-        if (!user.isVerified())
-            throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
+        if (!user.isVerified()) throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
         return user.getId();
     }
 }

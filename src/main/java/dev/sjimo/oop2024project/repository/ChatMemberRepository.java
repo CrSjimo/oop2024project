@@ -7,9 +7,12 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ChatMemberRepository extends JpaRepository<ChatMember, Long> {
-    Optional<ChatMember> findByUser_IdAndChat_Id (Long userId, Long chatId);
+    Optional<ChatMember> findByUser_IdAndChat_Id(Long userId, Long chatId);
+
     boolean existsByUser_IdAndChat_Id(Long userId, Long chatId);
+
     List<ChatMember> findAllByChat_Id(Long chatId);
+
     List<ChatMember> findAllByUser_Id(Long userId);
 
 }

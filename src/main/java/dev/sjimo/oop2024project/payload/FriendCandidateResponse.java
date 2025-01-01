@@ -11,43 +11,43 @@ public class FriendCandidateResponse {
     FriendCandidate.Status status;
     LocalDateTime createdDate;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public Long getId() {
         return id;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getMessage() {
         return message;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    public void setMessage(String message) {
+        this.message = message;
     }
 
     public Long getUserId() {
         return userId;
     }
 
-    public void setStatus(FriendCandidate.Status status) {
-        this.status = status;
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
     public FriendCandidate.Status getStatus() {
         return status;
     }
 
-    public void setCreatedDate(LocalDateTime createdDate) {
-        this.createdDate = createdDate;
+    public void setStatus(FriendCandidate.Status status) {
+        this.status = status;
     }
 
     public LocalDateTime getCreatedDate() {
         return createdDate;
+    }
+
+    public void setCreatedDate(LocalDateTime createdDate) {
+        this.createdDate = createdDate;
     }
 }

@@ -4,11 +4,11 @@ import dev.sjimo.oop2024project.model.UserData;
 
 public class UserDataResponse {
 
-    private String username;
-    private UserData.Gender gender;
-    private String gravatarEmail;
-    private String description;
-    private String email;
+    private final String username;
+    private final UserData.Gender gender;
+    private final String gravatarEmail;
+    private final String description;
+    private final String email;
 
     public UserDataResponse(String username, UserData.Gender gender, String gravatarEmail, String description, String email) {
         this.username = username;

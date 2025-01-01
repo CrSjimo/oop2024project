@@ -17,11 +17,11 @@ public class ChatToMemberCandidate {
     private User user;              //被邀请的用户
 
     @ManyToOne
-    @JoinColumn(name = "chat_id",nullable = false)
+    @JoinColumn(name = "chat_id", nullable = false)
     private Chat chat;
 
     @ManyToOne
-    @JoinColumn(name = "issuer_id",nullable = false)
+    @JoinColumn(name = "issuer_id", nullable = false)
     private User issuer;            //邀请的群管理员
 
     private String message;
@@ -31,12 +31,6 @@ public class ChatToMemberCandidate {
     @Enumerated(EnumType.ORDINAL)
     private Status status;
 
-    @JsonFormat(shape = JsonFormat.Shape.NUMBER)
-    public enum Status {
-        PENDING,
-        ACCEPTED,
-        REJECTED
-    }
     public Long getId() {
         return id;
     }
@@ -56,6 +50,7 @@ public class ChatToMemberCandidate {
     public void setChat(Chat chat) {
         this.chat = chat;
     }
+
     public User getIssuer() {
         return issuer;
     }
@@ -68,18 +63,24 @@ public class ChatToMemberCandidate {
         return message;
     }
 
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
     public LocalDateTime getCreatedDate() {
         return createdDate;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    public Status getStatus() {
+        return status;
     }
 
     public void setStatus(Status status) {
         this.status = status;
     }
-    public Status getStatus() {
-        return status;
+
+    @JsonFormat(shape = JsonFormat.Shape.NUMBER)
+    public enum Status {
+        PENDING, ACCEPTED, REJECTED
     }
 }

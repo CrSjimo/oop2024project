@@ -1,9 +1,8 @@
 package dev.sjimo.oop2024project.service;
 
 import dev.sjimo.oop2024project.model.Chat;
-import dev.sjimo.oop2024project.model.ChatMember;
-import dev.sjimo.oop2024project.model.User;
 import dev.sjimo.oop2024project.model.Message;
+import dev.sjimo.oop2024project.model.User;
 import dev.sjimo.oop2024project.payload.MessageRequest;
 import dev.sjimo.oop2024project.payload.MessageResponse;
 import dev.sjimo.oop2024project.repository.ChatMemberRepository;
@@ -13,14 +12,13 @@ import dev.sjimo.oop2024project.repository.UserRepository;
 import dev.sjimo.oop2024project.utils.ErrorCode;
 import dev.sjimo.oop2024project.utils.ResponseException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
-
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 
 @Service
 public class MessageService {
@@ -55,8 +53,7 @@ public class MessageService {
      */
     public void sendMessage(Long userId, Long chatId, MessageRequest messageRequest) {
         User user = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
-        if (!user.isVerified())
-            throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
+        if (!user.isVerified()) throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
 
         Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new ResponseException(ErrorCode.CHAT_NOT_EXIST));
 
@@ -78,8 +75,7 @@ public class MessageService {
      */
     public void revokeMessage(Long userId, Long messageId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
-        if (!user.isVerified())
-            throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
+        if (!user.isVerified()) throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
 
         Message message = messageRepository.findById(messageId).orElseThrow(() -> new ResponseException(ErrorCode.MESSAGE_NOT_EXIST));
 
@@ -108,38 +104,29 @@ public class MessageService {
      */
     public List<MessageResponse> getMessage(Long userId, Long chatId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
-        if (!user.isVerified())
-            throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
+        if (!user.isVerified()) throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
 
         Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new ResponseException(ErrorCode.CHAT_NOT_EXIST));
 
         checkIsMember(user, chat);
         var allMessages = messageRepository.findAllByUser_IdAndChat_Id(userId, chatId);
         return allMessages.stream().map(message -> {
-            MessageResponse messageResponse = new MessageResponse(
-                    message.getId(),
-                    message.getMessage(),
-                    message.getUser(),
-                    message.getChat(),
-                    message.getCreatedDate(),
-                    message.getStatus()
-            );
+            MessageResponse messageResponse = new MessageResponse(message.getId(), message.getMessage(), message.getUser(), message.getChat(), message.getCreatedDate(), message.getStatus());
             return messageResponse;
         }).toList();
     }
+
     /**
      * 获取最近的消息
      */
     public MessageResponse getLatestMessage(Long userId, Long chatId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
-        if (!user.isVerified())
-            throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
+        if (!user.isVerified()) throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
         Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new ResponseException(ErrorCode.CHAT_NOT_EXIST));
 
         checkIsMember(user, chat);
         var message = messageRepository.findLatestMessageIdByChatId(chatId);
-        if (message.isEmpty())
-            return null;
+        if (message.isEmpty()) return null;
         Message latestMessage = message.get();
         return new MessageResponse(latestMessage.getId(), latestMessage.getMessage(), latestMessage.getUser(), chat, latestMessage.getCreatedDate(), latestMessage.getStatus());
     }
@@ -149,13 +136,11 @@ public class MessageService {
      */
     public List<MessageResponse> getMessages(Long userId, Long messageId, Integer limit) {
         User user = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
-        if (!user.isVerified())
-            throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
+        if (!user.isVerified()) throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
         Message message = messageRepository.findById(messageId).orElseThrow(() -> new ResponseException(ErrorCode.MESSAGE_NOT_EXIST));
         Long chatId = message.getChat().getId();
         checkIsMember(user, message.getChat());
-        if (limit < 0)
-            throw new ResponseException(ErrorCode.MESSAGE_NOT_EXIST);
+        if (limit < 0) throw new ResponseException(ErrorCode.MESSAGE_NOT_EXIST);
         Pageable pageable = PageRequest.of(0, limit); // limit 是你想要的条数
         var messages = messageRepository.findMessagesBefore(chatId, messageId, pageable);
         return messages.stream().map(m -> new MessageResponse(m.getId(), m.getMessage(), m.getUser(), m.getChat(), m.getCreatedDate(), m.getStatus())).toList();
@@ -166,8 +151,7 @@ public class MessageService {
      */
     public List<MessageResponse> getMessagesAfter(Long userId, Long messageId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new ResponseException(ErrorCode.USER_NOT_EXIST));
-        if (!user.isVerified())
-            throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
+        if (!user.isVerified()) throw new ResponseException(ErrorCode.USER_NOT_VERIFIED);
         Message message = messageRepository.findById(messageId).orElseThrow(() -> new ResponseException(ErrorCode.MESSAGE_NOT_EXIST));
         Long chatId = message.getChat().getId();
         checkIsMember(user, message.getChat());

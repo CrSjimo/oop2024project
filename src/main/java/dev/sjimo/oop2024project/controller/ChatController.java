@@ -31,12 +31,12 @@ public class ChatController {
     }
 
     @GetMapping("/private_chat/{user1Id}/{user2Id}")
-    public ChatResponse getPrivateChat(@RequestHeader("Authorization") String jwtToken, @PathVariable Long user1Id, @PathVariable Long user2Id){
-        Long ownerId = jwtService.extractUserId(jwtToken.replace("Bearer ",""));
-        if (!user1Id.equals(ownerId)){
+    public ChatResponse getPrivateChat(@RequestHeader("Authorization") String jwtToken, @PathVariable Long user1Id, @PathVariable Long user2Id) {
+        Long ownerId = jwtService.extractUserId(jwtToken.replace("Bearer ", ""));
+        if (!user1Id.equals(ownerId)) {
             throw new ResponseException(ErrorCode.PERMISSION_DENIED);
         }
-        return chatService.getPrivateChat(user1Id,user2Id);
+        return chatService.getPrivateChat(user1Id, user2Id);
     }
 
     @GetMapping("/group/{groupId}")

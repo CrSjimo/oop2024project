@@ -22,6 +22,7 @@ public class ContactController {
 
     /**
      * 更新好友信息，如备注名等
+     *
      * @param jwtToken
      * @param user1Id
      * @param user2Id
@@ -33,12 +34,13 @@ public class ContactController {
             throw new ResponseException(ErrorCode.PERMISSION_DENIED);
         }
 
-        contactService.updateFriendData(user1Id,user2Id,updateFriendRequest.getCommentName());
+        contactService.updateFriendData(user1Id, user2Id, updateFriendRequest.getCommentName());
 
     }
 
     /**
      * 删除好友
+     *
      * @param jwtToken
      * @param user1Id
      * @param user2Id
@@ -54,6 +56,7 @@ public class ContactController {
 
     /**
      * 列出所有好友
+     *
      * @param jwtToken
      * @param user1Id
      * @return
@@ -69,6 +72,7 @@ public class ContactController {
 
     /**
      * 增加用户到黑名单
+     *
      * @param jwtToken
      * @param user1Id
      * @param user2Id
@@ -84,6 +88,7 @@ public class ContactController {
 
     /**
      * 从黑名单移除用户
+     *
      * @param jwtToken
      * @param user1Id
      * @param user2Id
@@ -99,6 +104,7 @@ public class ContactController {
 
     /**
      * 列出所有userId的黑名单
+     *
      * @param jwtToken
      * @param user1Id
      * @return
@@ -111,8 +117,10 @@ public class ContactController {
         }
         return contactService.getBlockList(user1Id);
     }
+
     /**
      * 列出所有收到的好友申请
+     *
      * @param jwtToken
      * @param user1Id
      * @return
@@ -128,6 +136,7 @@ public class ContactController {
 
     /**
      * 接受指定的好友申请
+     *
      * @param jwtToken
      * @param user1Id
      * @param id
@@ -143,6 +152,7 @@ public class ContactController {
 
     /**
      * 拒绝指定的好友申请
+     *
      * @param jwtToken
      * @param user1Id
      * @param id
@@ -158,6 +168,7 @@ public class ContactController {
 
     /**
      * 列出所有发给别人的好友申请
+     *
      * @param jwtToken
      * @param user1Id
      * @return
@@ -173,6 +184,7 @@ public class ContactController {
 
     /**
      * 发送好友申请，也就是加好友
+     *
      * @param jwtToken
      * @param user1Id
      * @param user2Id

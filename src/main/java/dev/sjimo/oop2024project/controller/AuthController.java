@@ -6,7 +6,6 @@ import dev.sjimo.oop2024project.service.MailService;
 import dev.sjimo.oop2024project.service.UserService;
 import dev.sjimo.oop2024project.service.VerificationService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
