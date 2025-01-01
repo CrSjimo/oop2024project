@@ -29,13 +29,13 @@ public class ChatController {
         return chatService.createGroup(ownerId, createGroupRequest.getGroupName());
     }
 
-    @PutMapping("/private_chat/{user1Id}/{user2Id}")
+    @GetMapping("/private_chat/{user1Id}/{user2Id}")
     public ChatResponse getPrivateChat(@RequestHeader("Authorization") String jwtToken, @PathVariable Long user1Id, @PathVariable Long user2Id){
-        Long ownerId = jwtService.extractUserId(jwtToken.replace("Bearer",""));
+        Long ownerId = jwtService.extractUserId(jwtToken.replace("Bearer ",""));
         if (!user1Id.equals(ownerId)){
             throw new ResponseException(ErrorCode.PERMISSION_DENIED);
         }
-        return chatService.getPrivateChat(user1Id,user1Id);
+        return chatService.getPrivateChat(user1Id,user2Id);
     }
 
     @GetMapping("/group/{groupId}")
